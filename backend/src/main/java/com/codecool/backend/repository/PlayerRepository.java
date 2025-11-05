@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface PlayerRepository extends MongoRepository<Player, String> {
     Optional<Player> findByName(String name);
+    long deleteByStatus(String status);
 }

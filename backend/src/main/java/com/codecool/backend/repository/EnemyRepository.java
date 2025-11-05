@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EnemyRepository extends MongoRepository<Enemy, String> {
+    long deleteByHp(int hp);
 }
