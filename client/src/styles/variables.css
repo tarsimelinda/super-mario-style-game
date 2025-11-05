@@ -1,0 +1,74 @@
+:root {
+    --app-bg: #ffffff;
+    --surface: #ffffff;
+    --surface-muted: #f7f8fa;
+
+    --text: #1f2937;
+    --text-muted: #64748b;
+    --border: #e5e7eb;
+
+    --primary: #2563eb;
+    --primary-contrast: #ffffff;
+
+    --accent: #ffd700;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+
+    --panel-bg: rgba(0, 0, 0, .6);
+
+    --btn-bg: #ffffff;
+    --btn-bg-hover: #f5f5f5;
+    --btn-fg: #111111;
+    --btn-border: #e5e7eb;
+
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    --line-height: 1.5;
+
+    --fs-xs: 12px;
+    --fs-sm: 14px;
+    --fs-md: 16px;
+    --fs-lg: 18px;
+    --fs-xl: 24px;
+    --fs-2xl: 32px;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, .08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, .12);
+
+    --transition-fast: .15s ease;
+    --transition: .25s ease;
+
+    --z-base: 1;
+    --z-overlay: 20;
+    --z-toast: 30;
+
+    --bp-sm: 480px;
+    --bp-md: 768px;
+    --bp-lg: 1024px;
+    --bp-xl: 1280px;
+}
+
+.theme-dark {
+    --app-bg: #0b1220;
+    --surface: #111827;
+    --surface-muted: #0f172a;
+    --text: #e5e7eb;
+    --text-muted: #94a3b8;
+    --border: #334155;
+
+    --btn-bg: #1f2937;
+    --btn-bg-hover: #111827;
+    --btn-fg: #e5e7eb;
+    --btn-border: #374151;
+
+    --panel-bg: rgba(0, 0, 0, .55);
+}

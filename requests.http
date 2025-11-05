@@ -1,0 +1,54 @@
+### Players
+GET http://localhost:8080/api/players
+
+POST http://localhost:8080/api/players
+Content-Type: application/json
+
+{
+    "name": "Peach",
+    "hp": 95,
+    "coins": 12,
+    "shield": true
+}
+
+PATCH http://localhost:8080/api/players/Peach
+Content-Type: application/json
+
+{
+    "status": "menu"
+}
+
+DELETE http://localhost:8080/api/players?status=playing
+
+### Enemies
+GET http://localhost:8080/api/enemies
+
+POST http://localhost:8080/api/enemies
+Content-Type: application/json
+
+{
+    "damage": 7,
+    "speed": 3,
+    "hp": 20,
+    "color": "green",
+    "canJump": true
+}
+
+DELETE http://localhost:8080/api/enemies/zero-hp
+
+### Users
+GET http://localhost:8080/api/users
+
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "name": "Toad",
+    "checkpoint": 1,
+    "character": "support"
+}
+
+
+
+
+

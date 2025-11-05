@@ -1,0 +1,47 @@
+.container {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.form {
+    display: block;
+}
+
+.card {
+    border: 1px solid #eee;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.h3 {
+    margin-top: 0;
+}
+
+.label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    box-sizing: border-box;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.error {
+    color: crimson;
+    margin-bottom: 12px;
+}
