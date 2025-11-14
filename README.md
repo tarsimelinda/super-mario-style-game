@@ -44,7 +44,7 @@ This project is a small 2D platformer game created as a personal CV project, sho
 - a full **REST API** built with Spring Boot 3
 - MongoDB persistence for players and game data
 - request validation, DTOs, error handling
-- integration tests with **JUnit + MockMvc**
+- Unit tests for the service layer using **JUnit 5 + Mockito**
 - token-based backend protection using a custom **DevTokenFilter** and request-level header security.
 
 The goal is to demonstrate a clean, maintainable, testable application with modern tooling across both the frontend and backend.
@@ -69,12 +69,17 @@ The goal is to demonstrate a clean, maintainable, testable application with mode
 ### Backend
 
 - **Spring Boot 3**
+- **Layered architecture (Controller → Service → Repository)**
 - **Spring Web + Spring Data MongoDB**
-- **MongoDB Atlas**
-- **DTOs, validators, exception handlers**
-- **DevTokenFilter + FilterConfig** (X-API-KEY request filtering)
-- **CORSConfig** (configurable via env variable)
-- **JUnit 5 + MockMvc** tests
+- **DTOs + Jakarta Validation**
+- **Lombok**
+- **Custom GlobalExceptionHandler**
+- **DevTokenFilter + FilterConfig** (custom X-API-KEY security)
+- **CORSConfig** (environment-based)
+- **JUnit 5 + Mockito (service unit tests)** 
+- **Business logic fully extracted into service layer**
+- **DTO → model mapping in service**
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -165,6 +170,9 @@ The backend runs at http://localhost:7070
 
  Your API is protected with the X-API-KEY header → requests without the correct token return 401 Unauthorized.
 
+
+
+
 5. Change git remote url to avoid accidental pushes to base project
    ```sh
    git remote set-url origin github_username/repo_name
@@ -206,7 +214,7 @@ Enemies and coins can be accessed or managed via the REST API.
 | Player registration via frontend form        |    <span style="color:green">Done</span>  |
 | REST API (players, enemies, users)           |    <span style="color:green">Done</span>  |
 | DTOs, validation, exception handling         |    <span style="color:green">Done</span>  |
-| Integration tests (MockMvc)                  |    <span style="color:green">Done</span>  |
+| Unit tests for the service layer using JUnit 5 + Mockito                  |    <span style="color:green">Done</span>  |
 | Global CORS + dev profile                    |    <span style="color:green">Done</span>  |
 | Responsive layout + modular CSS              |    <span style="color:green">Done</span>  |
 | **User authentication (JWT)**                |  Planned |
