@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import styles from "./RegisterPage.module.css";
 import PlayerCard from "./PlayerCard";
 import { validatePlayers } from "../../utils/validation";
+import { createUser } from "../../api/users";
 
 export default function RegisterPage() {
     const { players } = useParams();
@@ -38,29 +39,22 @@ export default function RegisterPage() {
         setError(null);
 
         try {
-            // Send a POST request for each player
             const responses = await Promise.all(
                 playersData.map((player) =>
-                    fetch("/api/users", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            name: player.name,
-                            character: player.character,
-                        }),
+                    createUser({
+                        name: player.name,
+                        character: player.character,
                     })
                 )
             );
 
-            // Check for any failed requests
             const failed = responses.find((res) => !res.ok);
             if (failed) {
+                console.error(failed.data || failed.status);
                 throw new Error("One or more player registrations failed.");
             }
 
-            // Save players data in sessionStorage and navigate to /game
+
             sessionStorage.setItem("playersData", JSON.stringify(playersData));
             navigate("/game", { state: { playersData } });
         } catch (err) {

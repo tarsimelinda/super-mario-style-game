@@ -2,82 +2,85 @@
 
 <br />
 <div align="center">
-    <img src="/client/public/game-icon.png" alt="game-icon" width="80" height="80">
-  </a>
+  <img src="/client/public/game-icon.png" alt="game-icon" width="80" height="80">
 
-  <h3 align="center">Super-Mario Style game</h3>
+  <h3 align="center">Super Mario–Style Platformer Game</h3>
 
   <p align="center">
-    A 2D platformer game designed for adventure lovers to jump, collect, and conquer challenging worlds.
+    A full-stack 2D platformer game built with React + Vite (frontend) and Spring Boot 3 + MongoDB (backend).
     <br />
-    <a href="git clone https://github.com/tarsimelinda/freestyle-mern-project-react.git
-">View Demo</a>
+    <a href="https://github.com/tarsimelinda/freestyle-mern-project-react">View Repository</a>
+  </p>
 </div>
 
 
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
+---
+
+## Table of Contents
+- [About The Project](#about-the-project)
+  - [Built With](#built-with)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Environment Variables](#environment-variables)
+  - [Installation](#installation)
+- [Running the Project](#running-the-project)
+- [Usage](#usage)
+- [Roadmap](#roadmap)
+- [Commands](#commands)
+- [Future Improvements](#future-improvements)
+- [Contact](#contact)
 
 
+
+---
 
 ## About The Project
 
-This is a small 2D platformer game built as a personal CV project to demonstrate React and Spring Boot full-stack development.
-Players can move, jump, collect coins, and avoid enemies. The project includes a full backend REST API with MongoDB persistence, DTOs, validation, and test coverage using JUnit + MockMvc.
+This project is a small 2D platformer game created as a personal CV project, showcasing complete **full-stack development** with:
 
-The goal was to create a clean, maintainable structure with reusable hooks, modular CSS, and a REST-compliant backend.
+- real-time rendering in React via **HTML Canvas**
+- reusable custom hooks for physics and game loop
+- modular CSS for a clean UI structure
+- a full **REST API** built with Spring Boot 3
+- MongoDB persistence for players and game data
+- request validation, DTOs, error handling
+- integration tests with **JUnit + MockMvc**
+- token-based backend protection using a custom **DevTokenFilter** and request-level header security.
+
+The goal is to demonstrate a clean, maintainable, testable application with modern tooling across both the frontend and backend.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+---
+
+## Built With
+
+### Frontend
+
+- **React + Vite**
+- **CSS Modules**
+- **HTML Canvas rendering**
+- **Custom hooks** (keyboard controls, physics, timing)
+- **ESLint + Prettier**
+- **Environment-based token injection (VITE_DEV_TOKEN)**
+
+### Backend
+
+- **Spring Boot 3**
+- **Spring Web + Spring Data MongoDB**
+- **MongoDB Atlas**
+- **DTOs, validators, exception handlers**
+- **DevTokenFilter + FilterConfig** (X-API-KEY request filtering)
+- **CORSConfig** (configurable via env variable)
+- **JUnit 5 + MockMvc** tests
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
-### Built With
-
-#### Frontend
-
-* React + Vite – modern setup for fast development
-
-* CSS Modules + global variables/utilities – modular styling
-
-* HTML Canvas – real-time rendering and physics
-
-* Custom hooks – keyboard controls, physics, and game loop
-
-* ESLint + Prettier – consistent code formatting
-
-#### Backend
-
-* Spring Boot 3 – REST API and application structure
-
-* MongoDB + Spring Data – persistence layer
-
-* DTOs + Validation – clean request handling
-
-* JUnit + MockMvc – controller-level integration tests
-
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
+---
 
 ## Getting Started
 
@@ -85,36 +88,59 @@ Follow these steps to run both the frontend and backend locally.
 
 ### Prerequisites
 
-You’ll need the following installed:
+Install the following:
 
-* [Node.js 18+]
+- [Node.js 18+]
+- [npm]
+- [Java 21+]
+- [Maven 3.9+]
+- [MongoDB Atlas or local MongoDB]
 
-* [npm]
+---
 
-* [Java 17+]
+## Environment Variables
 
-* [Maven 3.9+]
+### 🔵 Backend Required Variables
 
-* [MongoDB]
+Set these **before running Spring Boot**:
+
+#### Windows PowerShell
+```sh
+setx MONGO_URI "mongodb+srv://<user>:<password>@cluster.mongodb.net/supermario"
+setx SERVER_PORT "7070"
+setx APP_DEV_TOKEN "supersecret123"
+setx APP_CORS_ORIGIN "http://localhost:5173"
+```
+
+Used in application.properties:
+```sh
+spring.data.mongodb.uri=${MONGO_URI}
+spring.data.mongodb.database=supermario
+server.port=${SERVER_PORT:7070}
+
+app.dev.token=${APP_DEV_TOKEN}
+app.cors.origin=${APP_CORS_ORIGIN}
+```
+
+### Frontend Required Variables
+
+Create client/.env:
+```sh
+VITE_DEV_TOKEN=supersecret123
+```
+The frontend automatically sends it with every API request:
+```sh
+headers: {
+  "X-API-KEY": import.meta.env.VITE_DEV_TOKEN
+}
+```
 
 ### Installation
 
-
-
-1. Clone the repository
+#### Clone the repository
 ```sh
    git clone https://github.com/tarsimelinda/freestyle-mern-project-react.git
    ```
-
-2. Set up environment variables.
-
-Windows PowerShell:
-```sh
-$env:MONGODB_URI = "mongodb+srv://<user>:<password>@cluster.mongodb.net/supermario"
-$env:SERVER_PORT = "8080"
-$env:CORS_ORIGIN = "http://localhost:5173"
-```
-These will be automatically picked up by Spring Boot from application.properties.
    
 ### Run the Game
 
@@ -131,11 +157,13 @@ Then open your browser at http://localhost:5173.
 #### Backend (Spring Boot)
 
 ```sh
-cd server
+cd backend
 mvn spring-boot:run
 ```
-The backend runs at http://localhost:8080
+The backend runs at http://localhost:7070
  and exposes REST endpoints under /api.
+
+ Your API is protected with the X-API-KEY header → requests without the correct token return 401 Unauthorized.
 
 5. Change git remote url to avoid accidental pushes to base project
    ```sh
@@ -190,29 +218,31 @@ Enemies and coins can be accessed or managed via the REST API.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-| Command               | Description                        |
-| --------------------- | ---------------------------------- |
-| `npm run dev`         | Start frontend (Vite)              |
-| `npm run lint`        | Lint all frontend files            |
-| `npm run format`      | Format frontend code with Prettier |
-| `mvn test`            | Run backend tests                  |
-| `mvn spotless:apply`  | Format backend Java code           |
-| `mvn spring-boot:run` | Run backend server                 |
+| Command               | Description              |
+| --------------------- | ------------------------ |
+| `npm run dev`         | Start frontend           |
+| `npm run lint`        | Lint frontend files      |
+| `npm run format`      | Format frontend code     |
+| `mvn test`            | Run backend tests        |
+| `mvn spotless:apply`  | Format backend Java code |
+| `mvn spring-boot:run` | Run backend server       |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 ##  Future Improvements
 
-* Code cleanup and modular structure
+* Code cleanup and further modularization
 
-* Authentication & leaderboard
+* JWT authentication
 
-* Save game progress to MongoDB
+* Leaderboard stored in MongoDB
 
-* Character animations and power-ups
+* More dynamic enemies and power-ups
 
-* Deployment to cloud (Render / Vercel + Mongo Atlas)
+* Deployment to cloud (Render + Vercel + Mongo Atlas)
+
+* Custom sprites and animations
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -229,6 +259,6 @@ Project Link: https://github.com/tarsimelinda/freestyle-mern-project-react
 
 [Node.js 18+]: https://nodejs.org/en
 [npm]: https://www.npmjs.com/
-[Java 17+]: https://adoptium.net/en-GB
+[Java 21+]: https://adoptium.net/en-GB
 [Maven 3.9+]: https://maven.apache.org/
 [MongoDB]: https://www.mongodb.com/

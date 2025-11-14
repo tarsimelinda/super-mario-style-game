@@ -1,5 +1,5 @@
 export default class Physics {
-  constructor(gravity = 0.5, jumpPower = 15) {
+  constructor(gravity = 0.5, jumpPower = 10) {
     this.gravity = gravity;
     this.jumpPower = jumpPower;
   }

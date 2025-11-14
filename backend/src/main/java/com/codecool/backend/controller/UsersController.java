@@ -2,9 +2,9 @@ package com.codecool.backend.controller;
 
 import com.codecool.backend.dto.UserCreateRequest;
 import com.codecool.backend.model.User;
-import com.codecool.backend.repository.UserRepository;
+import com.codecool.backend.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,24 +13,20 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UsersController {
 
-    private final UserRepository repository;
+    private final UserService service;
 
-    public UsersController(UserRepository repository) {
-        this.repository = repository;
+    public UsersController(UserService service) {
+        this.service = service;
     }
 
     @GetMapping
     public List<User> getAll() {
-        return repository.findAll();
+        return service.getAll();
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@Valid @RequestBody UserCreateRequest body) {
-        User u = new User();
-        u.setName(body.name());
-        u.setCheckpoint(body.checkpoint() != null ? body.checkpoint() : 1);
-        u.setCharacter(body.character());
-        User saved = repository.save(u);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    @ResponseStatus(HttpStatus.CREATED)
+    public User create(@Valid @RequestBody UserCreateRequest body) {
+        return service.create(body);
     }
 }

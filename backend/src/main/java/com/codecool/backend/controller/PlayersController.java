@@ -2,74 +2,48 @@ package com.codecool.backend.controller;
 
 import com.codecool.backend.dto.PlayerCreateRequest;
 import com.codecool.backend.dto.PlayerPatchRequest;
-import com.codecool.backend.exception.NotFoundException;
 import com.codecool.backend.model.Player;
-import com.codecool.backend.repository.PlayerRepository;
+import com.codecool.backend.service.PlayerService;
 import jakarta.validation.Valid;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/players")
 public class PlayersController {
 
-    private final PlayerRepository repository;
+    private final PlayerService service;
 
-    private static final Set<String> ALLOWED_STATUS = Set.of("playing", "menu", "dead");
-
-    public PlayersController(PlayerRepository repository) {
-        this.repository = repository;
+    public PlayersController(PlayerService service) {
+        this.service = service;
     }
 
     @GetMapping
     public List<Player> getAll() {
-        return repository.findAll();
+        return service.getAll();
     }
 
     @GetMapping("/{name}")
     public Player getByName(@PathVariable String name) {
-        return repository.findByName(name)
-                .orElseThrow(() -> new NotFoundException("Player not found: " + name));
+        return service.getByName(name);
     }
 
     @PostMapping
-    public ResponseEntity<Player> create(@Valid @RequestBody PlayerCreateRequest body) {
-        Player p = new Player();
-        p.setName(body.name());
-        p.setHp(body.hp());
-        p.setCoins(body.coins());
-        p.setShield(Boolean.TRUE.equals(body.shield()));
-        p.setStatus("playing");
-        Player saved = repository.save(p);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Player create(@Valid @RequestBody PlayerCreateRequest body) {
+        return service.create(body);
     }
 
     @PatchMapping("/{name}")
     public Player patch(@PathVariable String name, @RequestBody PlayerPatchRequest body) {
-        Player p = repository.findByName(name)
-                .orElseThrow(() -> new NotFoundException("Player not found: " + name));
-
-        if (body.hp() != null)    p.setHp(Math.max(0, body.hp()));        // min 0
-        if (body.coins() != null) p.setCoins(Math.max(0, body.coins()));  // min 0
-        if (body.shield() != null) p.setShield(body.shield());
-        if (body.status() != null) {
-            if (!ALLOWED_STATUS.contains(body.status())) {
-                throw new IllegalArgumentException("Invalid status value");
-            }
-            p.setStatus(body.status());
-        }
-        return repository.save(p);
+        return service.patch(name, body);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteByStatus(@RequestParam(required = false) String status) {
-        if (status == null || status.isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        repository.deleteByStatus(status);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteByStatus(@RequestParam String status) {
+        service.deleteByStatus(status);
     }
 }
