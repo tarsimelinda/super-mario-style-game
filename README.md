@@ -43,9 +43,9 @@ This project is a small 2D platformer game created as a personal CV project, sho
 - modular CSS for a clean UI structure
 - a full **REST API** built with Spring Boot 3
 - MongoDB persistence for players and game data
-- request validation, DTOs, error handling
+- DTOs, validation, global exception handling
 - Unit tests for the service layer using **JUnit 5 + Mockito**
-- token-based backend protection using a custom **DevTokenFilter** and request-level header security.
+- server-side rate limiting for security
 
 The goal is to demonstrate a clean, maintainable, testable application with modern tooling across both the frontend and backend.
 
@@ -64,7 +64,6 @@ The goal is to demonstrate a clean, maintainable, testable application with mode
 - **HTML Canvas rendering**
 - **Custom hooks** (keyboard controls, physics, timing)
 - **ESLint + Prettier**
-- **Environment-based token injection (VITE_DEV_TOKEN)**
 
 ### Backend
 
@@ -74,11 +73,8 @@ The goal is to demonstrate a clean, maintainable, testable application with mode
 - **DTOs + Jakarta Validation**
 - **Lombok**
 - **Custom GlobalExceptionHandler**
-- **DevTokenFilter + FilterConfig** (custom X-API-KEY security)
-- **CORSConfig** (environment-based)
+- **Rate limiting using Bucket4J**
 - **JUnit 5 + Mockito (service unit tests)** 
-- **Business logic fully extracted into service layer**
-- **DTO → model mapping in service**
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -113,8 +109,6 @@ Set these **before running Spring Boot**:
 ```sh
 setx MONGO_URI "mongodb+srv://<user>:<password>@cluster.mongodb.net/supermario"
 setx SERVER_PORT "7070"
-setx APP_DEV_TOKEN "supersecret123"
-setx APP_CORS_ORIGIN "http://localhost:5173"
 ```
 
 Used in application.properties:
@@ -122,23 +116,8 @@ Used in application.properties:
 spring.data.mongodb.uri=${MONGO_URI}
 spring.data.mongodb.database=supermario
 server.port=${SERVER_PORT:7070}
-
-app.dev.token=${APP_DEV_TOKEN}
-app.cors.origin=${APP_CORS_ORIGIN}
 ```
-
-### Frontend Required Variables
-
-Create client/.env:
-```sh
-VITE_DEV_TOKEN=supersecret123
-```
-The frontend automatically sends it with every API request:
-```sh
-headers: {
-  "X-API-KEY": import.meta.env.VITE_DEV_TOKEN
-}
-```
+Backend protection relies on rate limiting.
 
 ### Installation
 
@@ -168,16 +147,9 @@ mvn spring-boot:run
 The backend runs at http://localhost:7070
  and exposes REST endpoints under /api.
 
- Your API is protected with the X-API-KEY header → requests without the correct token return 401 Unauthorized.
+ The backend is protected with rate limiting
+→ excessive requests receive HTTP 429 Too Many Requests.
 
-
-
-
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v
-   ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -215,7 +187,7 @@ Enemies and coins can be accessed or managed via the REST API.
 | REST API (players, enemies, users)           |    <span style="color:green">Done</span>  |
 | DTOs, validation, exception handling         |    <span style="color:green">Done</span>  |
 | Unit tests for the service layer using JUnit 5 + Mockito                  |    <span style="color:green">Done</span>  |
-| Global CORS + dev profile                    |    <span style="color:green">Done</span>  |
+| Rate limiting on backend                    |    <span style="color:green">Done</span>  |
 | Responsive layout + modular CSS              |    <span style="color:green">Done</span>  |
 | **User authentication (JWT)**                |  Planned |
 | **Leaderboard via backend**                  |  Planned |
