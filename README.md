@@ -59,22 +59,22 @@ The goal is to demonstrate a clean, maintainable, testable application with mode
 
 ### Frontend
 
-- **React + Vite**
-- **CSS Modules**
-- **HTML Canvas rendering**
-- **Custom hooks** (keyboard controls, physics, timing)
-- **ESLint + Prettier**
+- **[React] + [Vite]**
+- **[CSS Modules]**
+- **[HTML Canvas] rendering**
+- **[Custom hooks]** (keyboard controls, physics, timing)
+- **[ESLint] + [Prettier]**
 
 ### Backend
 
-- **Spring Boot 3**
+- **[Spring Boot] 3**
 - **Layered architecture (Controller → Service → Repository)**
-- **Spring Web + Spring Data MongoDB**
-- **DTOs + Jakarta Validation**
-- **Lombok**
+- **[Spring Web] + [Spring Data MongoDB]**
+- **DTOs + [Jakarta Validation]**
+- **[Lombok]**
 - **Custom GlobalExceptionHandler**
-- **Rate limiting using Bucket4J**
-- **JUnit 5 + Mockito (service unit tests)** 
+- **Rate limiting using [Bucket4J]**
+- **[JUnit] 5 + [Mockito] (service unit tests)** 
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -95,13 +95,13 @@ Install the following:
 - [npm]
 - [Java 21+]
 - [Maven 3.9+]
-- [MongoDB Atlas or local MongoDB]
+- [MongoDB]
 
 ---
 
 ## Environment Variables
 
-### 🔵 Backend Required Variables
+###  Backend Required Variables
 
 Set these **before running Spring Boot**:
 
@@ -160,15 +160,17 @@ The backend runs at http://localhost:7070
 1. Start both frontend and backend.
 
 2. In your browser, open http://localhost:5173
-.
+. 
 
-3. Select 1 or 2 players.
+      ![alt text](pic2.png)
 
-4. Register players (name + character).
+3. Select 1 or 2 players. ![alt text](pic1.1.png)
 
-5. Start the game and collect coins while avoiding enemies.
+4. Register players (name + character). ![alt text](pic3.png)
 
-6. When game over, restart or return to the main menu.
+5. Start the game and collect coins while avoiding enemies. ![alt text](pic5.png) ![alt text](pic6.png)
+
+6. When game over, restart or return to the main menu. ![alt text](pic7.png)
 
 The backend automatically stores player and user data in MongoDB.
 Enemies and coins can be accessed or managed via the REST API.
@@ -242,3 +244,17 @@ Project Link: https://github.com/tarsimelinda/freestyle-mern-project-react
 [Java 21+]: https://adoptium.net/en-GB
 [Maven 3.9+]: https://maven.apache.org/
 [MongoDB]: https://www.mongodb.com/
+
+[React]: https://react.dev/
+[Vite]: https://vite.dev/
+[ESLint]: https://eslint.org/
+[Prettier]: https://prettier.io/
+
+[Spring Boot]: https://spring.io/projects/spring-boot
+[Spring Web]: https://spring.io/projects/spring-ws
+[spring Data MongoDB]: https://spring.io/projects/spring-data-mongodb
+[Jakarta Validation]: https://beanvalidation.org/
+[Lombok]: https://projectlombok.org/
+[Bucket4J]: https://bucket4j.com/
+[JUnit]: https://junit.org/
+[Mockito]: https://site.mockito.org/
