@@ -8,13 +8,18 @@ import Platform from "../../game/Platform";
 import Coins from "../../game/Coins";
 import GameOver from "../GameOver/GameOver";
 import Scoreboard from "../Scoreboard/Scoreboard";
-import { GAME_CONSTANTS, GAME_CONFIG } from "../../game/config";
+import { GAME_CONSTANTS } from "../../game/config";
+import { fetchDefaultLevel } from "../../api/levelApi";
 import styles from "./GameCanvas.module.css";
 
 const GameCanvas = ({ players, onExit }) => {
     const [gameOver, setGameOver] = useState(false);
     const [coinsCollected, setCoinsCollected] = useState([]);
     const [lives, setLives] = useState(3);
+    const [level, setLevel] = useState(null);
+    const [loadingLevel, setLoadingLevel] = useState(true);
+    const [levelError, setLevelError] = useState(null);
+
     const canvasRef = useRef(null);
 
     const playerCount = Array.isArray(players) ? players.length : players;
@@ -27,106 +32,220 @@ const GameCanvas = ({ players, onExit }) => {
         GAME_CONSTANTS.jumpStrength
     );
 
-    const platforms = useMemo(
-        () => GAME_CONFIG.platforms.map(([x, y, w, h]) => new Platform(x, y, w, h)),
-        []
-    );
+    const platforms = useMemo(() => {
+        if (!level) return [];
+
+        return level.platforms.map(
+            (platform) =>
+                new Platform(
+                    platform.x,
+                    platform.y,
+                    platform.width,
+                    platform.height
+                )
+        );
+    }, [level]);
 
     const enemies = useRef([]);
     const coins = useRef([]);
 
+    useEffect(() => {
+        const loadLevel = async () => {
+            try {
+                setLoadingLevel(true);
+                setLevelError(null);
+
+                const loadedLevel = await fetchDefaultLevel();
+
+                setLevel(loadedLevel);
+            } catch (error) {
+                console.error("Could not load level:", error);
+                setLevelError("Could not load level.");
+            } finally {
+                setLoadingLevel(false);
+            }
+        };
+
+        loadLevel();
+    }, []);
+
     const initGame = useCallback(() => {
-        player1.current = new Player(50, 200, 50, 50, 5);
-        player2.current = playerCount > 1 ? new Player(150, 200, 50, 50, 5) : null;
+        if (!level) return;
 
-        enemies.current = GAME_CONFIG.enemies.map(([x, y, w, h]) => new Enemy(x, y, w, h));
+        const playerStart = level.playerStart || { x: 50, y: 200 };
 
-        const margin = 20;
-        coins.current = Array.from({ length: GAME_CONFIG.coinCount }, () => {
-            const x = Math.random() * (GAME_CONSTANTS.canvasWidth - margin * 2) + margin;
-            const y = Math.random() * (GAME_CONSTANTS.groundY - margin * 2) + margin;
-            return new Coins(x, y, 20, 20);
-        });
+        player1.current = new Player(
+            playerStart.x,
+            playerStart.y,
+            50,
+            50,
+            5
+        );
+
+        player2.current =
+            playerCount > 1
+                ? new Player(playerStart.x + 100, playerStart.y, 50, 50, 5)
+                : null;
+
+        enemies.current = level.enemies.map(
+            (enemy) =>
+                new Enemy(
+                    enemy.x,
+                    enemy.y,
+                    enemy.width,
+                    enemy.height,
+                    enemy.speed ?? 2,
+                    GAME_CONSTANTS.canvasWidth
+                )
+        );
+
+        coins.current = level.coins.map(
+            (coin) =>
+                new Coins(
+                    coin.x,
+                    coin.y,
+                    coin.width,
+                    coin.height
+                )
+        );
 
         setCoinsCollected(Array.from({ length: playerCount }, () => 0));
-        setLives(3);
+        setLives(level.lives ?? 3);
         resetKeys();
         setGameOver(false);
-    }, [playerCount, resetKeys]);
+    }, [level, playerCount, resetKeys]);
 
     useEffect(() => {
-        initGame();
-    }, [initGame]);
+        if (level) {
+            initGame();
+        }
+    }, [level, initGame]);
 
     const drawFrame = useCallback(() => {
-        if (gameOver) return;
+        if (gameOver || !level) return;
 
         const canvas = canvasRef.current;
         if (!canvas) return;
+
         const ctx = canvas.getContext && canvas.getContext("2d");
         if (!ctx) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         ctx.fillStyle = "#87ceeb";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "green";
-        ctx.fillRect(0, GAME_CONSTANTS.groundY, canvas.width, canvas.height - GAME_CONSTANTS.groundY);
 
-        if (keys1.current.up && player1.current) physics.jump(player1.current);
-        if (playerCount > 1 && player2.current && keys2.current.up) physics.jump(player2.current);
+        ctx.fillStyle = "green";
+        ctx.fillRect(
+            0,
+            GAME_CONSTANTS.groundY,
+            canvas.width,
+            canvas.height - GAME_CONSTANTS.groundY
+        );
+
+        if (keys1.current.up && player1.current) {
+            physics.jump(player1.current);
+        }
+
+        if (playerCount > 1 && player2.current && keys2.current.up) {
+            physics.jump(player2.current);
+        }
 
         const playersArr = [];
-        if (player1.current) playersArr.push({ player: player1.current, idx: 0 });
-        if (player2.current) playersArr.push({ player: player2.current, idx: 1 });
 
-        applyGravity(playersArr.map((p) => p.player), GAME_CONSTANTS.groundY, platforms);
+        if (player1.current) {
+            playersArr.push({ player: player1.current, idx: 0 });
+        }
 
-        if (player1.current) player1.current.move(keys1.current, canvas.width);
-        if (playerCount > 1 && player2.current) player2.current.move(keys2.current, canvas.width);
+        if (player2.current) {
+            playersArr.push({ player: player2.current, idx: 1 });
+        }
+
+        applyGravity(
+            playersArr.map((p) => p.player),
+            GAME_CONSTANTS.groundY,
+            platforms
+        );
+
+        if (player1.current) {
+            player1.current.move(keys1.current, canvas.width);
+        }
+
+        if (playerCount > 1 && player2.current) {
+            player2.current.move(keys2.current, canvas.width);
+        }
 
         platforms.forEach((platform) => platform.draw(ctx));
+
         enemies.current.forEach((enemy) => {
             enemy.move();
             enemy.draw(ctx);
         });
+
         coins.current.forEach((coin) => coin.draw(ctx));
-        playersArr.forEach((pObj) => pObj.player.draw(ctx, pObj.idx === 0 ? "red" : "cyan"));
+
+        playersArr.forEach((pObj) =>
+            pObj.player.draw(ctx, pObj.idx === 0 ? "red" : "cyan")
+        );
 
         let collisionHandled = false;
+
         for (const enemy of enemies.current) {
             if (collisionHandled) break;
+
             for (const pObj of playersArr) {
                 if (enemy.checkCollision(pObj.player)) {
                     collisionHandled = true;
+
                     setLives((prevLives) => {
                         const next = prevLives - 1;
+
                         if (next <= 0) {
                             setGameOver(true);
                         } else {
-                            if (player1.current) player1.current.reset(50, 200);
-                            if (player2.current) player2.current.reset(150, 200);
+                            const playerStart = level.playerStart || { x: 50, y: 200 };
+
+                            if (player1.current) {
+                                player1.current.reset(playerStart.x, playerStart.y);
+                            }
+
+                            if (player2.current) {
+                                player2.current.reset(playerStart.x + 100, playerStart.y);
+                            }
+
                             if (player1.current) {
                                 player1.current.velocityY = 0;
-                                player1.current.canJump = player1.current.y + player1.current.height >= player1.current.groundY;
+                                player1.current.canJump =
+                                    player1.current.y + player1.current.height >=
+                                    player1.current.groundY;
                             }
+
                             if (player2.current) {
                                 player2.current.velocityY = 0;
-                                player2.current.canJump = player2.current.y + player2.current.height >= player2.current.groundY;
+                                player2.current.canJump =
+                                    player2.current.y + player2.current.height >=
+                                    player2.current.groundY;
                             }
+
                             resetKeys();
                         }
+
                         return next;
                     });
+
                     break;
                 }
             }
         }
 
         const remaining = [];
+
         for (const coin of coins.current) {
             let collectedBy = -1;
+
             for (const pObj of playersArr) {
                 const p = pObj.player;
+
                 if (
                     p.x < coin.x + coin.width &&
                     p.x + p.width > coin.x &&
@@ -137,6 +256,7 @@ const GameCanvas = ({ players, onExit }) => {
                     break;
                 }
             }
+
             if (collectedBy !== -1) {
                 setCoinsCollected((prev) => {
                     const copy = [...prev];
@@ -147,9 +267,11 @@ const GameCanvas = ({ players, onExit }) => {
                 remaining.push(coin);
             }
         }
+
         coins.current = remaining;
     }, [
         gameOver,
+        level,
         playerCount,
         keys1,
         keys2,
@@ -159,7 +281,7 @@ const GameCanvas = ({ players, onExit }) => {
         resetKeys,
     ]);
 
-    useGameLoop(drawFrame, !gameOver);
+    useGameLoop(drawFrame, !gameOver && !!level);
 
     const handleRestart = () => {
         initGame();
@@ -173,17 +295,35 @@ const GameCanvas = ({ players, onExit }) => {
         }
     };
 
+    if (loadingLevel) {
+        return <div className={styles.container}>Loading level...</div>;
+    }
+
+    if (levelError) {
+        return <div className={styles.container}>{levelError}</div>;
+    }
+
+    if (!level) {
+        return <div className={styles.container}>No level data.</div>;
+    }
+
     return (
         <div className={styles.container}>
             <Scoreboard
                 coinsCollected={coinsCollected}
-                totalCoins={GAME_CONFIG.coinCount}
+                totalCoins={level.coins.length}
                 lives={lives}
                 playerCount={playerCount}
             />
+
             {gameOver && (
-                <GameOver onRestart={handleRestart} onExit={handleExit} finalScore={coinsCollected} />
+                <GameOver
+                    onRestart={handleRestart}
+                    onExit={handleExit}
+                    finalScore={coinsCollected}
+                />
             )}
+
             <canvas
                 ref={canvasRef}
                 width={GAME_CONSTANTS.canvasWidth}
