@@ -22,4 +22,9 @@ public class LevelController {
     public LevelDto getDefaultLevel() {
         return levelService.getDefaultLevel();
     }
+
+    @GetMapping("/random")
+    public LevelDto getRandomLevel() {
+        return levelService.getRandomLevel();
+    }
 }

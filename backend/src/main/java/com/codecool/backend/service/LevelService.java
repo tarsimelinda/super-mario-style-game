@@ -8,21 +8,62 @@ import com.codecool.backend.dto.PointDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class LevelService {
 
+    private final PlatformGeneratorService platformGeneratorService;
+    private final CoinGeneratorService coinGeneratorService;
+    private final Random random = new Random();
+    private final LevelValidatorService levelValidatorService;
+
+    public LevelService(
+            PlatformGeneratorService platformGeneratorService,
+            CoinGeneratorService coinGeneratorService,
+            LevelValidatorService levelValidatorService
+    ) {
+        this.platformGeneratorService = platformGeneratorService;
+        this.coinGeneratorService = coinGeneratorService;
+        this.levelValidatorService = levelValidatorService;
+    }
+
     public LevelDto getDefaultLevel() {
+        List<PlatformDto> platforms = getDefaultPlatforms();
+
         return new LevelDto(
                 new PointDto(50, 200),
                 3,
-                getPlatforms(),
-                getEnemies(),
-                getCoins()
+                platforms,
+                getDefaultEnemies(),
+                getDefaultCoins()
         );
     }
 
-    private List<PlatformDto> getPlatforms() {
+    public LevelDto getRandomLevel() {
+        for (int attempt = 0; attempt < 50; attempt++) {
+            List<PlatformDto> platforms = platformGeneratorService.generatePlatforms();
+
+            if (!levelValidatorService.isPlayable(platforms)) {
+                continue;
+            }
+
+            List<CoinDto> coins = coinGeneratorService.generateCoins(platforms);
+            List<EnemySpawnDto> enemies = generateEnemies(platforms);
+
+            return new LevelDto(
+                    new PointDto(120, 410),
+                    3,
+                    platforms,
+                    enemies,
+                    coins
+            );
+        }
+
+        return getDefaultLevel();
+    }
+
+    private List<PlatformDto> getDefaultPlatforms() {
         return List.of(
                 new PlatformDto(100, 450, 200, 20),
                 new PlatformDto(400, 380, 150, 20),
@@ -35,14 +76,14 @@ public class LevelService {
         );
     }
 
-    private List<EnemySpawnDto> getEnemies() {
+    private List<EnemySpawnDto> getDefaultEnemies() {
         return List.of(
                 new EnemySpawnDto(500, 310, 40, 40, 2),
                 new EnemySpawnDto(300, 160, 40, 40, 2)
         );
     }
 
-    private List<CoinDto> getCoins() {
+    private List<CoinDto> getDefaultCoins() {
         return List.of(
                 new CoinDto(150, 410, 20, 20),
                 new CoinDto(230, 410, 20, 20),
@@ -60,5 +101,25 @@ public class LevelService {
 
                 new CoinDto(130, 110, 20, 20)
         );
+    }
+
+    private List<EnemySpawnDto> generateEnemies(List<PlatformDto> platforms) {
+        return platforms.stream()
+                .skip(1)
+                .filter(platform -> platform.width() >= 90)
+                .filter(platform -> random.nextInt(100) < 35)
+                .limit(calculateEnemyCount(platforms))
+                .map(platform -> new EnemySpawnDto(
+                        platform.x() + platform.width() / 2 - 20,
+                        platform.y() - 40,
+                        40,
+                        40,
+                        2
+                ))
+                .toList();
+    }
+
+    private int calculateEnemyCount(List<PlatformDto> platforms) {
+        return Math.max(1, Math.min(5, platforms.size() / 6));
     }
 }
