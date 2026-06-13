@@ -150,27 +150,6 @@ public class PlatformGeneratorService {
                 .anyMatch(existing -> canMoveFromTo(existing, candidate));
     }
 
-    private boolean canJumpOrFallBetween(PlatformDto from, PlatformDto to) {
-        int horizontalDistance = Math.abs(from.centerX() - to.centerX());
-        int verticalDifference = to.y() - from.y();
-
-        boolean horizontallyReachable = horizontalDistance <= MAX_HORIZONTAL_REACH;
-
-        boolean canJumpUp =
-                verticalDifference < 0
-                        && Math.abs(verticalDifference) <= MAX_JUMP_UP;
-
-        boolean canDropDown =
-                verticalDifference >= 0
-                        && verticalDifference <= MAX_DROP_DOWN;
-
-        boolean roughlyOverlappingForFall =
-                from.right() > to.left() - 80
-                        && from.left() < to.right() + 80;
-
-        return horizontallyReachable && (canJumpUp || canDropDown || roughlyOverlappingForFall);
-    }
-
     private int randomBetween(int min, int max) {
         if (max < min) {
             return min;

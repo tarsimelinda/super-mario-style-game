@@ -8,15 +8,6 @@ import java.util.*;
 @Service
 public class LevelValidatorService {
 
-    private static final double MIN_REACHABLE_PLATFORM_RATIO = 1.0;
-
-    private static final int MAX_JUMP_UP = 90;
-    private static final int MAX_DROP_DOWN = 260;
-
-    private static final int MAX_HORIZONTAL_JUMP_REACH = 170;
-    private static final int MAX_HORIZONTAL_DROP_REACH = 220;
-    private static final int FALL_OVERLAP_MARGIN = 50;
-
     public boolean isPlayable(List<PlatformDto> platforms) {
         if (platforms.isEmpty()) {
             return false;
