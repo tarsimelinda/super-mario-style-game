@@ -22,8 +22,15 @@ public class GlobalExceptionHandler {
         var errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .toList();
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiError("VALIDATION_ERROR", errors));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError("BAD_REQUEST", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

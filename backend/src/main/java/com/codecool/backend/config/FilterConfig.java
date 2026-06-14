@@ -12,7 +12,7 @@ public class FilterConfig {
     public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration(RateLimitFilter filter) {
         FilterRegistrationBean<RateLimitFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(filter);
-        bean.addUrlPatterns("/api/users/*");
+        bean.addUrlPatterns("/api/users", "/api/users/*");
         bean.setOrder(1);
         return bean;
     }

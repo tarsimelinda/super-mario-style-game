@@ -1,13 +1,20 @@
 package com.codecool.backend.security;
 
-import org.springframework.stereotype.Component;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Bucket4j;
 import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import io.github.bucket4j.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+
+import org.springframework.http.HttpStatus;
+
 import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitFilter implements Filter {
@@ -21,7 +28,7 @@ public class RateLimitFilter implements Filter {
     }
 
     private Bucket resolveBucket(String ip) {
-        return buckets.computeIfAbsent(ip, k -> createBucket());
+        return buckets.computeIfAbsent(ip, ignored -> createBucket());
     }
 
     @Override
@@ -36,9 +43,16 @@ public class RateLimitFilter implements Filter {
 
         if (bucket.tryConsume(1)) {
             chain.doFilter(req, res);
-        } else {
-            response.setStatus(429);
-            response.getWriter().write("Rate limit exceeded, try again later.");
+            return;
         }
+
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write("""
+        {
+          "code": "RATE_LIMIT_EXCEEDED",
+          "details": "Too many requests. Please try again later."
+        }
+        """);
     }
 }
