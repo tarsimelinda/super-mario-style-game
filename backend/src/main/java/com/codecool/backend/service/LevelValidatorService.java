@@ -8,6 +8,12 @@ import java.util.*;
 @Service
 public class LevelValidatorService {
 
+    private final PlatformReachabilityService platformReachabilityService;
+
+    public LevelValidatorService(PlatformReachabilityService platformReachabilityService) {
+        this.platformReachabilityService = platformReachabilityService;
+    }
+
     public boolean isPlayable(List<PlatformDto> platforms) {
         if (platforms.isEmpty()) {
             return false;
@@ -33,7 +39,7 @@ public class LevelValidatorService {
             PlatformDto current = queue.poll();
 
             for (PlatformDto next : platforms) {
-                if (!visited.contains(next) && canMoveFromTo(current, next)) {
+                if (!visited.contains(next) && platformReachabilityService.canMoveFromTo(current, next)) {
                     visited.add(next);
                     queue.add(next);
                 }
@@ -43,45 +49,4 @@ public class LevelValidatorService {
         return visited;
     }
 
-    private boolean canMoveFromTo(PlatformDto from, PlatformDto to) {
-        int verticalDifference = to.y() - from.y();
-
-        if (verticalDifference < 0) {
-            return canJumpUpToPlatform(from, to, Math.abs(verticalDifference));
-        }
-
-        return canDropDownToPlatform(from, to, verticalDifference);
-    }
-
-    private boolean canJumpUpToPlatform(PlatformDto from, PlatformDto to, int heightDifference) {
-        int horizontalGap = horizontalGapBetween(from, to);
-
-        return heightDifference <= 100
-                && horizontalGap <= 190;
-    }
-
-    private boolean canDropDownToPlatform(PlatformDto from, PlatformDto to, int dropDistance) {
-        int horizontalGap = horizontalGapBetween(from, to);
-
-        boolean horizontallyClose = horizontalGap <= 170;
-
-        boolean overlapsEnough =
-                from.right() > to.left() - 40
-                        && from.left() < to.right() + 40;
-
-        return dropDistance <= 240
-                && (horizontallyClose || overlapsEnough);
-    }
-
-    private int horizontalGapBetween(PlatformDto a, PlatformDto b) {
-        if (a.right() < b.left()) {
-            return b.left() - a.right();
-        }
-
-        if (b.right() < a.left()) {
-            return a.left() - b.right();
-        }
-
-        return 0;
-    }
 }
