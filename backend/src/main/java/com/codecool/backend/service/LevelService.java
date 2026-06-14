@@ -17,6 +17,10 @@ public class LevelService {
     private final CoinGeneratorService coinGeneratorService;
     private final Random random = new Random();
     private final LevelValidatorService levelValidatorService;
+    private static final PlatformDto RANDOM_LEVEL_START_PLATFORM =
+            new PlatformDto(80, 460, 220, 20);
+    private static final PlatformDto DEFAULT_LEVEL_START_PLATFORM =
+            new PlatformDto(100, 450, 200, 20);
 
     public LevelService(
             PlatformGeneratorService platformGeneratorService,
@@ -31,8 +35,12 @@ public class LevelService {
     public LevelDto getDefaultLevel() {
         List<PlatformDto> platforms = getDefaultPlatforms();
 
+        if (!levelValidatorService.isPlayable(DEFAULT_LEVEL_START_PLATFORM, platforms)) {
+            throw new IllegalStateException("Default level is not playable");
+        }
+
         return new LevelDto(
-                new PointDto(50, 200),
+                new PointDto(150, 400),
                 3,
                 platforms,
                 getDefaultEnemies(),
@@ -44,7 +52,7 @@ public class LevelService {
         for (int attempt = 0; attempt < 50; attempt++) {
             List<PlatformDto> platforms = platformGeneratorService.generatePlatforms();
 
-            if (!levelValidatorService.isPlayable(platforms)) {
+            if (!levelValidatorService.isPlayable(RANDOM_LEVEL_START_PLATFORM, platforms)) {
                 continue;
             }
 

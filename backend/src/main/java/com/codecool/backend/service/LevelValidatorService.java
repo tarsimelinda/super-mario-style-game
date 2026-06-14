@@ -14,12 +14,15 @@ public class LevelValidatorService {
         this.platformReachabilityService = platformReachabilityService;
     }
 
-    public boolean isPlayable(List<PlatformDto> platforms) {
-        if (platforms.isEmpty()) {
+    public boolean isPlayable(PlatformDto startPlatform, List<PlatformDto> platforms) {
+        if (startPlatform == null || platforms == null || platforms.isEmpty()) {
             return false;
         }
 
-        PlatformDto startPlatform = platforms.get(0);
+        if (!platforms.contains(startPlatform)) {
+            return false;
+        }
+
         Set<PlatformDto> reachable = findReachablePlatforms(startPlatform, platforms);
 
         return reachable.size() == platforms.size();
@@ -39,7 +42,8 @@ public class LevelValidatorService {
             PlatformDto current = queue.poll();
 
             for (PlatformDto next : platforms) {
-                if (!visited.contains(next) && platformReachabilityService.canMoveFromTo(current, next)) {
+                if (!visited.contains(next)
+                        && platformReachabilityService.canMoveFromTo(current, next)) {
                     visited.add(next);
                     queue.add(next);
                 }
@@ -48,5 +52,4 @@ public class LevelValidatorService {
 
         return visited;
     }
-
 }
