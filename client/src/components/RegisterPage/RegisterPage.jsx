@@ -80,10 +80,10 @@ export default function RegisterPage() {
                 )}
 
                 <div className={styles.actions}>
-                    <button type="submit" disabled={loading}>
+                    <button type="submit" className="btn btn-primary" disabled={loading}>
                         {loading ? "Starting..." : "Start Game"}
                     </button>
-                    <button type="button" onClick={() => navigate("/")}>
+                    <button type="button" className="btn" onClick={() => navigate("/")}>
                         Back
                     </button>
                 </div>

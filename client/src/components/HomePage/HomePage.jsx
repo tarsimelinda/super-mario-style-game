@@ -9,7 +9,7 @@ export default function HomePage() {
             <h2 className={styles.subtitle}>Select number of players</h2>
 
             <div className={styles.buttons}>
-                <button className="btn btn-primary" onClick={() => navigate("/register/1")}>
+                <button className="btn" onClick={() => navigate("/register/1")}>
                     1 Player
                 </button>
                 <button className="btn" onClick={() => navigate("/register/2")}>

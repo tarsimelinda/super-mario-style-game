@@ -25,10 +25,10 @@ function GameOver({ players = [], onRestart, onExit, finalScore }) {
             )}
 
             <div className={styles.buttons}>
-                <button type="button" className={styles.button} onClick={onRestart}>
+                <button type="button" className="btn btn-primary" onClick={onRestart}>
                     Play again
                 </button>
-                <button type="button" className={styles.button} onClick={onExit}>
+                <button type="button" className="btn" onClick={onExit}>
                     Main menu
                 </button>
             </div>
