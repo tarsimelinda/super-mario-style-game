@@ -26,8 +26,10 @@ body {
     min-width: 320px;
     min-height: 100vh;
 
-    background: var(--app-bg, #ffffff);
-    color: var(--text, #213547);
+    background:
+        radial-gradient(circle at top, rgba(56, 189, 248, .16), transparent 34rem),
+        linear-gradient(180deg, #0b1020 0%, #020617 100%);
+    color: var(--text, #e5e7eb);
 }
 
 h1,

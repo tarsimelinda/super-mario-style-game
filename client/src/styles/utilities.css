@@ -106,7 +106,7 @@
 }
 
 .muted {
-    color: var(--muted, #64748b);
+    color: var(--text-muted, #64748b);
 }
 
 .bold {
