@@ -1,6 +1,8 @@
+import styles from "./Footer.module.css";
+
 export default function Footer() {
     return (
-        <footer style={{ textAlign: "center", marginTop: "2rem", fontSize: "0.85rem", opacity: 0.8 }}>
+        <footer className={styles.footer}>
             <p>
                 Game icon by{" "}
                 <a
