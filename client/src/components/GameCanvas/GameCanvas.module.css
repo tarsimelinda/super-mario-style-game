@@ -3,7 +3,7 @@
 }
 
 .canvas {
-    border: 1px solid var(--border-color, black);
+    border: 1px solid var(--border, black);
     display: block;
     touch-action: none;
     background: transparent;
