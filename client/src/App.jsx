@@ -7,12 +7,17 @@ import Footer from "./components/Footer/Footer";
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/register/:players" element={<RegisterPage />} />
-        <Route path="/game" element={<GameCanvasWrapper />} />
-      </Routes>
-      <Footer />
+      <div className="appShell">
+        <main className="appContent">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/register/:players" element={<RegisterPage />} />
+            <Route path="/game" element={<GameCanvasWrapper />} />
+          </Routes>
+        </main>
+
+        <Footer />
+      </div>
     </BrowserRouter>
   );
 }
