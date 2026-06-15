@@ -1,6 +1,14 @@
 import styles from "./GameOver.module.css";
 
-function GameOver({ onRestart, onExit, finalScore }) {
+function GameOver({ players = [], onRestart, onExit, finalScore }) {
+    const getPlayerName = (index) => {
+        if (Array.isArray(players) && players[index]?.name) {
+            return players[index].name;
+        }
+
+        return `Player ${index + 1}`;
+    };
+
     return (
         <div className={styles.overlay}>
             <h1 className={styles.title}>GAME OVER</h1>
@@ -10,7 +18,7 @@ function GameOver({ onRestart, onExit, finalScore }) {
                     <strong>Final scores:</strong>
                     <pre style={{ textAlign: "left", marginTop: 8 }}>
                         {Array.isArray(finalScore)
-                            ? finalScore.map((s, i) => `Player ${i + 1}: ${s} coins`).join("\n")
+                            ? finalScore.map((s, i) => `${getPlayerName(i)}: ${s} coins`).join("\n")
                             : `${finalScore}`}
                     </pre>
                 </div>

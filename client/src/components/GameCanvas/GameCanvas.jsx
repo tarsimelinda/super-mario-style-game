@@ -15,6 +15,7 @@ import styles from "./GameCanvas.module.css";
 const GameCanvas = ({ players, onExit }) => {
     const [gameOver, setGameOver] = useState(false);
     const [coinsCollected, setCoinsCollected] = useState([]);
+    const [currentLevelCoinsCollected, setCurrentLevelCoinsCollected] = useState(0);
     const [lives, setLives] = useState(3);
     const [level, setLevel] = useState(null);
     const [loadingLevel, setLoadingLevel] = useState(true);
@@ -70,9 +71,18 @@ const GameCanvas = ({ players, onExit }) => {
         }
     }, []);
 
-    useEffect(() => {
+    const startNewRun = useCallback(() => {
+        setCoinsCollected(Array.from({ length: playerCount }, () => 0));
+        setCurrentLevelCoinsCollected(0);
+        setLives(3);
+        setGameOver(false);
+        resetKeys();
         loadLevel(1);
-    }, [loadLevel]);
+    }, [playerCount, resetKeys, loadLevel]);
+
+    useEffect(() => {
+        startNewRun();
+    }, [startNewRun]);
 
     const initGame = useCallback(() => {
         if (!level) return;
@@ -114,7 +124,7 @@ const GameCanvas = ({ players, onExit }) => {
                 )
         );
 
-        setCoinsCollected(Array.from({ length: playerCount }, () => 0));
+        setCurrentLevelCoinsCollected(0);
         setLives(level.lives ?? 3);
         resetKeys();
         setGameOver(false);
@@ -268,6 +278,8 @@ const GameCanvas = ({ players, onExit }) => {
                     copy[collectedBy] = (copy[collectedBy] || 0) + 1;
                     return copy;
                 });
+
+                setCurrentLevelCoinsCollected((prev) => prev + 1);
             } else {
                 remaining.push(coin);
             }
@@ -302,7 +314,7 @@ const GameCanvas = ({ players, onExit }) => {
     useGameLoop(drawFrame, !gameOver && !!level);
 
     const handleRestart = () => {
-        initGame();
+        startNewRun();
     };
 
     const handleExit = () => {
@@ -328,7 +340,9 @@ const GameCanvas = ({ players, onExit }) => {
     return (
         <div className={styles.container}>
             <Scoreboard
+                players={players}
                 coinsCollected={coinsCollected}
+                currentLevelCoinsCollected={currentLevelCoinsCollected}
                 totalCoins={level.coins.length}
                 lives={lives}
                 playerCount={playerCount}
@@ -337,6 +351,7 @@ const GameCanvas = ({ players, onExit }) => {
 
             {gameOver && (
                 <GameOver
+                    players={players}
                     onRestart={handleRestart}
                     onExit={handleExit}
                     finalScore={coinsCollected}
