@@ -9,7 +9,7 @@ import Coins from "../../game/Coins";
 import GameOver from "../GameOver/GameOver";
 import Scoreboard from "../Scoreboard/Scoreboard";
 import { GAME_CONSTANTS } from "../../game/config";
-import { fetchDefaultLevel } from "../../api/levelApi";
+import { fetchRandomLevel } from "../../api/levelApi";
 import styles from "./GameCanvas.module.css";
 
 const GameCanvas = ({ players, onExit }) => {
@@ -19,6 +19,7 @@ const GameCanvas = ({ players, onExit }) => {
     const [level, setLevel] = useState(null);
     const [loadingLevel, setLoadingLevel] = useState(true);
     const [levelError, setLevelError] = useState(null);
+    const [currentLevelNumber, setCurrentLevelNumber] = useState(1);
 
     const canvasRef = useRef(null);
 
@@ -48,26 +49,30 @@ const GameCanvas = ({ players, onExit }) => {
 
     const enemies = useRef([]);
     const coins = useRef([]);
+    const levelTransitioning = useRef(false);
+
+    const loadLevel = useCallback(async (levelNumber) => {
+        try {
+            setLoadingLevel(true);
+            setLevelError(null);
+            levelTransitioning.current = true;
+
+            const loadedLevel = await fetchRandomLevel();
+
+            setLevel(loadedLevel);
+            setCurrentLevelNumber(levelNumber);
+        } catch (error) {
+            console.error("Could not load level:", error);
+            setLevelError("Could not load level.");
+        } finally {
+            setLoadingLevel(false);
+            levelTransitioning.current = false;
+        }
+    }, []);
 
     useEffect(() => {
-        const loadLevel = async () => {
-            try {
-                setLoadingLevel(true);
-                setLevelError(null);
-
-                const loadedLevel = await fetchDefaultLevel();
-
-                setLevel(loadedLevel);
-            } catch (error) {
-                console.error("Could not load level:", error);
-                setLevelError("Could not load level.");
-            } finally {
-                setLoadingLevel(false);
-            }
-        };
-
-        loadLevel();
-    }, []);
+        loadLevel(1);
+    }, [loadLevel]);
 
     const initGame = useCallback(() => {
         if (!level) return;
@@ -269,6 +274,17 @@ const GameCanvas = ({ players, onExit }) => {
         }
 
         coins.current = remaining;
+
+        if (
+            remaining.length === 0 &&
+            level.coins.length > 0 &&
+            !levelTransitioning.current
+        ) {
+            levelTransitioning.current = true;
+            resetKeys();
+            loadLevel(currentLevelNumber + 1);
+        }
+
     }, [
         gameOver,
         level,
@@ -279,6 +295,8 @@ const GameCanvas = ({ players, onExit }) => {
         applyGravity,
         platforms,
         resetKeys,
+        loadLevel,
+        currentLevelNumber,
     ]);
 
     useGameLoop(drawFrame, !gameOver && !!level);
@@ -314,6 +332,7 @@ const GameCanvas = ({ players, onExit }) => {
                 totalCoins={level.coins.length}
                 lives={lives}
                 playerCount={playerCount}
+                levelNumber={currentLevelNumber}
             />
 
             {gameOver && (
