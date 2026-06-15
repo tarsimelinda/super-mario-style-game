@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Navigate } from "react-router-dom";
 import GameCanvas from "./GameCanvas/GameCanvas";
 
 export default function GameCanvasWrapper() {
@@ -18,8 +18,7 @@ export default function GameCanvasWrapper() {
     }
 
     if (!playersData) {
-        navigate("/", { replace: true });
-        return null;
+        return <Navigate to="/" replace />;
     }
 
     const handleExit = () => {
@@ -27,5 +26,9 @@ export default function GameCanvasWrapper() {
         navigate("/", { replace: true });
     };
 
-    return <GameCanvas players={playersData} onExit={handleExit} />;
+    return (
+        <div className="gamePage">
+            <GameCanvas players={playersData} onExit={handleExit} />
+        </div>
+    );
 }

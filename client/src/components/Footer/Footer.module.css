@@ -1,0 +1,22 @@
+.footer {
+    width: 100%;
+    padding: 16px 24px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid rgba(148, 163, 184, .18);
+    background: rgba(2, 6, 23, .55);
+}
+
+.footer p {
+    margin: 0;
+}
+
+.footer a {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.footer a:hover {
+    color: var(--accent);
+}

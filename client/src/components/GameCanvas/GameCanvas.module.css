@@ -7,13 +7,5 @@
     display: block;
     touch-action: none;
     background: transparent;
-
     max-width: 100%;
 }
-
-.hidden {
-    display: none;
-}
-
-.canvas { display: block; }
-.overlay { position: absolute; inset: 0; z-index: 20; }

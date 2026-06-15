@@ -40,6 +40,14 @@ h6 {
     font-weight: 700;
 }
 
+.gamePage {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
 p {
     margin: 0 0 1rem 0;
 }

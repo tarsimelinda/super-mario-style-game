@@ -362,7 +362,7 @@ const GameCanvas = ({ players, onExit }) => {
                 ref={canvasRef}
                 width={GAME_CONSTANTS.canvasWidth}
                 height={GAME_CONSTANTS.canvasHeight}
-                className={`${styles.canvas} ${gameOver ? styles.hidden : ""}`}
+                className={styles.canvas}
                 role="application"
                 aria-label="Game canvas"
             />
