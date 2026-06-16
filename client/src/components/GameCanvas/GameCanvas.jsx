@@ -122,7 +122,11 @@ const GameCanvas = ({ players, onExit }) => {
                     enemy.width,
                     enemy.height,
                     enemy.speed ?? 2,
-                    GAME_CONSTANTS.canvasWidth
+                    GAME_CONSTANTS.canvasWidth,
+                    enemy.damage ?? 1,
+                    enemy.hp ?? 1,
+                    enemy.color ?? "blue",
+                    enemy.canJump ?? false
                 )
         );
 
@@ -225,7 +229,7 @@ const GameCanvas = ({ players, onExit }) => {
                     collisionHandled = true;
 
                     setLives((prevLives) => {
-                        const next = prevLives - 1;
+                        const next = prevLives - (enemy.damage ?? 1);
 
                         if (next <= 0) {
                             playersArr.forEach((pObj) => {

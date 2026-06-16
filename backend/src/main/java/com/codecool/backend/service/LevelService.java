@@ -95,8 +95,8 @@ public class LevelService {
 
     private List<EnemySpawnDto> getDefaultEnemies() {
         return List.of(
-                new EnemySpawnDto(500, 310, 40, 40, 2),
-                new EnemySpawnDto(300, 160, 40, 40, 2)
+                new EnemySpawnDto(500, 310, 40, 40, 2, 1, 1, "blue", false),
+                new EnemySpawnDto(300, 160, 40, 40, 3, 2, 1, "purple", false)
         );
     }
 
@@ -120,6 +120,19 @@ public class LevelService {
         );
     }
 
+    private String randomEnemyColor() {
+        List<String> colors = List.of("blue", "purple", "darkred", "orange");
+        return colors.get(random.nextInt(colors.size()));
+    }
+
+    private int randomBetween(int min, int max) {
+        if (max < min) {
+            return min;
+        }
+
+        return random.nextInt(max - min + 1) + min;
+    }
+
     private List<EnemySpawnDto> generateEnemies(List<PlatformDto> platforms) {
         return platforms.stream()
                 .skip(1)
@@ -132,7 +145,11 @@ public class LevelService {
                         platform.y() - ENEMY_HEIGHT,
                         ENEMY_WIDTH,
                         ENEMY_HEIGHT,
-                        2
+                        randomBetween(1, 3),
+                        randomBetween(1, 2),
+                        randomBetween(1, 3),
+                        randomEnemyColor(),
+                        random.nextBoolean()
                 ))
                 .toList();
     }

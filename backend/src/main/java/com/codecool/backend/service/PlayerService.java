@@ -34,7 +34,16 @@ public class PlayerService {
         Player p = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Player not found: " + id));
 
-        applyPatch(p, body);
+        if (body.hp() != null) p.setHp(Math.max(0, body.hp()));
+        if (body.coins() != null) p.setCoins(Math.max(0, body.coins()));
+        if (body.shield() != null) p.setShield(body.shield());
+
+        if (body.status() != null) {
+            if (!ALLOWED_STATUS.contains(body.status())) {
+                throw new IllegalArgumentException("Invalid status value");
+            }
+            p.setStatus(body.status());
+        }
 
         return repository.save(p);
     }

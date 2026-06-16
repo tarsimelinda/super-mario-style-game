@@ -1,14 +1,29 @@
 import Character from "./Character";
 
 class Enemy extends Character {
-    constructor(x, y, width, height, speed = 2, canvasWidth = 1350) {
+    constructor(
+        x,
+        y,
+        width,
+        height,
+        speed = 2,
+        canvasWidth = 1350,
+        damage = 1,
+        hp = 1,
+        color = "blue",
+        canJump = false
+    ) {
         super(x, y, width, height);
         this.velocityX = speed;
         this.canvasWidth = canvasWidth;
+        this.damage = damage;
+        this.hp = hp;
+        this.color = color;
+        this.canJump = canJump;
     }
 
     draw(ctx) {
-        ctx.fillStyle = "blue";
+        ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 

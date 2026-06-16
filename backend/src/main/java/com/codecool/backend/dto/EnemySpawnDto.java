@@ -5,6 +5,10 @@ public record EnemySpawnDto(
         int y,
         int width,
         int height,
-        int speed
+        int speed,
+        int damage,
+        int hp,
+        String color,
+        boolean canJump
 ) {
 }
