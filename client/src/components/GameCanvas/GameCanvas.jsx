@@ -11,6 +11,7 @@ import Scoreboard from "../Scoreboard/Scoreboard";
 import { GAME_CONSTANTS } from "../../game/config";
 import { fetchRandomLevel } from "../../api/levelApi";
 import { patchPlayer } from "../../api/players";
+import { patchUserCheckpoint } from "../../api/users";
 import styles from "./GameCanvas.module.css";
 
 const GameCanvas = ({ players, onExit }) => {
@@ -57,6 +58,17 @@ const GameCanvas = ({ players, onExit }) => {
         (index) => {
             if (Array.isArray(players) && players[index]?.playerId) {
                 return players[index].playerId;
+            }
+
+            return null;
+        },
+        [players]
+    );
+
+    const getUserIdByIndex = useCallback(
+        (index) => {
+            if (Array.isArray(players) && players[index]?.userId) {
+                return players[index].userId;
             }
 
             return null;
@@ -334,7 +346,20 @@ const GameCanvas = ({ players, onExit }) => {
         ) {
             levelTransitioning.current = true;
             resetKeys();
-            loadLevel(currentLevelNumber + 1);
+
+            const nextLevelNumber = currentLevelNumber + 1;
+
+            playersArr.forEach((pObj) => {
+                const userId = getUserIdByIndex(pObj.idx);
+
+                if (userId) {
+                    patchUserCheckpoint(userId, nextLevelNumber).catch((error) => {
+                        console.error("Could not update user checkpoint:", error);
+                    });
+                }
+            });
+
+            loadLevel(nextLevelNumber);
         }
 
     }, [
@@ -350,6 +375,7 @@ const GameCanvas = ({ players, onExit }) => {
         loadLevel,
         currentLevelNumber,
         getPlayerIdByIndex,
+        getUserIdByIndex,
     ]);
 
     useGameLoop(drawFrame, !gameOver && !!level);

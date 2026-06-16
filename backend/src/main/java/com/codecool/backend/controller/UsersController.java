@@ -1,5 +1,6 @@
 package com.codecool.backend.controller;
 
+import com.codecool.backend.dto.UserCheckpointPatchRequest;
 import com.codecool.backend.dto.UserCreateRequest;
 import com.codecool.backend.model.User;
 import com.codecool.backend.service.UserService;
@@ -28,5 +29,13 @@ public class UsersController {
     @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody UserCreateRequest body) {
         return service.create(body);
+    }
+
+    @PatchMapping("/{id}/checkpoint")
+    public User updateCheckpoint(
+            @PathVariable String id,
+            @Valid @RequestBody UserCheckpointPatchRequest body
+    ) {
+        return service.updateCheckpoint(id, body.checkpoint());
     }
 }
