@@ -17,8 +17,23 @@ public class LevelService {
     private final CoinGeneratorService coinGeneratorService;
     private final Random random = new Random();
     private final LevelValidatorService levelValidatorService;
+
+    private static final int GROUND_Y = 550;
+    private static final int PLAYER_HEIGHT = 50;
+
+    private static final int ENEMY_WIDTH = 40;
+    private static final int ENEMY_HEIGHT = 40;
+    private static final int MIN_ENEMY_Y = 80;
+    private static final int MAX_ENEMY_Y = 420;
+
     private static final PlatformDto RANDOM_LEVEL_START_PLATFORM =
             new PlatformDto(80, 460, 220, 20);
+
+    private static final PointDto RANDOM_LEVEL_PLAYER_START =
+            new PointDto(120, GROUND_Y - PLAYER_HEIGHT);
+
+    private static final PointDto DEFAULT_LEVEL_PLAYER_START =
+            new PointDto(150, GROUND_Y - PLAYER_HEIGHT);
 
     public LevelService(
             PlatformGeneratorService platformGeneratorService,
@@ -34,7 +49,7 @@ public class LevelService {
         List<PlatformDto> platforms = getDefaultPlatforms();
 
         return new LevelDto(
-                new PointDto(150, 400),
+                DEFAULT_LEVEL_PLAYER_START,
                 3,
                 platforms,
                 getDefaultEnemies(),
@@ -54,7 +69,7 @@ public class LevelService {
             List<EnemySpawnDto> enemies = generateEnemies(platforms);
 
             return new LevelDto(
-                    new PointDto(120, 410),
+                    RANDOM_LEVEL_PLAYER_START,
                     3,
                     platforms,
                     enemies,
@@ -109,16 +124,23 @@ public class LevelService {
         return platforms.stream()
                 .skip(1)
                 .filter(platform -> platform.width() >= 90)
+                .filter(this::isSafeEnemyPlatform)
                 .filter(platform -> random.nextInt(100) < 35)
                 .limit(calculateEnemyCount(platforms))
                 .map(platform -> new EnemySpawnDto(
-                        platform.x() + platform.width() / 2 - 20,
-                        platform.y() - 40,
-                        40,
-                        40,
+                        platform.x() + platform.width() / 2 - ENEMY_WIDTH / 2,
+                        platform.y() - ENEMY_HEIGHT,
+                        ENEMY_WIDTH,
+                        ENEMY_HEIGHT,
                         2
                 ))
                 .toList();
+    }
+
+    private boolean isSafeEnemyPlatform(PlatformDto platform) {
+        int enemyY = platform.y() - ENEMY_HEIGHT;
+
+        return enemyY >= MIN_ENEMY_Y && enemyY <= MAX_ENEMY_Y;
     }
 
     private int calculateEnemyCount(List<PlatformDto> platforms) {
