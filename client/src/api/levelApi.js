@@ -1,21 +1,21 @@
-const API_BASE_URL = "http://localhost:7070";
+import { apiFetch } from "./client";
 
 export async function fetchDefaultLevel() {
-    const response = await fetch(`${API_BASE_URL}/api/levels/default`);
+    const response = await apiFetch("/levels/default");
 
     if (!response.ok) {
         throw new Error("Failed to load default level");
     }
 
-    return response.json();
+    return response.data;
 }
 
 export async function fetchRandomLevel() {
-    const response = await fetch(`${API_BASE_URL}/api/levels/random`);
+    const response = await apiFetch("/levels/random");
 
     if (!response.ok) {
         throw new Error("Failed to load random level");
     }
 
-    return response.json();
+    return response.data;
 }

@@ -4,6 +4,7 @@ import styles from "./RegisterPage.module.css";
 import PlayerCard from "./PlayerCard";
 import { validatePlayers } from "../../utils/validation";
 import { createUser } from "../../api/users";
+import { createPlayer } from "../../api/players";
 
 export default function RegisterPage() {
     const { players } = useParams();
@@ -40,22 +41,28 @@ export default function RegisterPage() {
 
         try {
             const responses = await Promise.all(
-                playersData.map((player) =>
+                playersData.flatMap((player) => [
                     createUser({
                         name: player.name,
                         character: player.character,
-                    })
-                )
+                    }),
+                    createPlayer({
+                        name: player.name,
+                        hp: 3,
+                        coins: 0,
+                        shield: false,
+                    }),
+                ])
             );
 
             const failed = responses.find((res) => !res.ok);
             if (failed) {
-                console.error(failed.data || failed.status);
+                console.error("Failed registration response:", failed);
                 throw new Error("One or more player registrations failed.");
             }
 
-
             sessionStorage.setItem("playersData", JSON.stringify(playersData));
+
             navigate("/game", { state: { playersData } });
         } catch (err) {
             console.error(err);
