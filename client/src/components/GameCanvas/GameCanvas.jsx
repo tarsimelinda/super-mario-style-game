@@ -23,6 +23,7 @@ const GameCanvas = ({ players, onExit }) => {
     const [loadingLevel, setLoadingLevel] = useState(true);
     const [levelError, setLevelError] = useState(null);
     const [currentLevelNumber, setCurrentLevelNumber] = useState(1);
+    const [paused, setPaused] = useState(false);
 
     const canvasRef = useRef(null);
 
@@ -80,6 +81,7 @@ const GameCanvas = ({ players, onExit }) => {
         try {
             setLoadingLevel(true);
             setLevelError(null);
+            setPaused(false);
             levelTransitioning.current = true;
 
             const loadedLevel = await fetchRandomLevel();
@@ -100,6 +102,7 @@ const GameCanvas = ({ players, onExit }) => {
         setCurrentLevelCoinsCollected(0);
         setLives(3);
         setGameOver(false);
+        setPaused(false);
         resetKeys();
         loadLevel(1);
     }, [playerCount, resetKeys, loadLevel]);
@@ -157,6 +160,11 @@ const GameCanvas = ({ players, onExit }) => {
         resetKeys();
         setGameOver(false);
     }, [level, playerCount, resetKeys]);
+
+    const handleTogglePause = () => {
+        setPaused((prev) => !prev);
+        resetKeys();
+    };
 
     useEffect(() => {
         if (level) {
@@ -378,13 +386,15 @@ const GameCanvas = ({ players, onExit }) => {
         getUserIdByIndex,
     ]);
 
-    useGameLoop(drawFrame, !gameOver && !!level);
+    useGameLoop(drawFrame, !gameOver && !!level && !paused);
 
     const handleRestart = () => {
         startNewRun();
     };
 
     const handleExit = () => {
+        setPaused(false);
+
         if (typeof onExit === "function") {
             onExit();
         } else {
@@ -407,6 +417,13 @@ const GameCanvas = ({ players, onExit }) => {
     return (
         <div className={styles.page}>
             <div className={styles.gameArea}>
+
+                {paused && !gameOver && (
+                    <div className={styles.pauseOverlay}>
+                        PAUSED
+                    </div>
+                )}
+
                 {gameOver && (
                     <GameOver
                         players={players}
@@ -436,6 +453,33 @@ const GameCanvas = ({ players, onExit }) => {
                     playerCount={playerCount}
                     levelNumber={currentLevelNumber}
                 />
+
+                <div className={styles.sidebarActions}>
+                    <button
+                        type="button"
+                        className="btn"
+                        onClick={handleTogglePause}
+                        disabled={gameOver}
+                    >
+                        {paused ? "Resume" : "Pause"}
+                    </button>
+
+                    <button
+                        type="button"
+                        className="btn"
+                        onClick={handleRestart}
+                    >
+                        Restart run
+                    </button>
+
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={handleExit}
+                    >
+                        Main menu
+                    </button>
+                </div>
             </aside>
         </div>
     );
