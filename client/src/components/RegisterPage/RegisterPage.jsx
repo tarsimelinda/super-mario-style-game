@@ -40,30 +40,43 @@ export default function RegisterPage() {
         setError(null);
 
         try {
-            const responses = await Promise.all(
-                playersData.flatMap((player) => [
-                    createUser({
-                        name: player.name,
-                        character: player.character,
-                    }),
-                    createPlayer({
-                        name: player.name,
-                        hp: 3,
-                        coins: 0,
-                        shield: false,
-                    }),
-                ])
-            );
+            const registeredPlayers = [];
 
-            const failed = responses.find((res) => !res.ok);
-            if (failed) {
-                console.error("Failed registration response:", failed);
-                throw new Error("One or more player registrations failed.");
+            for (const player of playersData) {
+                const userResponse = await createUser({
+                    name: player.name,
+                    character: player.character,
+                });
+
+                if (!userResponse.ok) {
+                    console.error("User creation failed:", userResponse);
+                    throw new Error("One or more user registrations failed.");
+                }
+
+                const playerResponse = await createPlayer({
+                    name: player.name,
+                    hp: 3,
+                    coins: 0,
+                    shield: false,
+                });
+
+                if (!playerResponse.ok) {
+                    console.error("Player creation failed:", playerResponse);
+                    throw new Error("One or more player registrations failed.");
+                }
+
+                registeredPlayers.push({
+                    ...player,
+                    userId: userResponse.data.id,
+                    playerId: playerResponse.data.id,
+                    hp: playerResponse.data.hp,
+                    coins: playerResponse.data.coins,
+                    status: playerResponse.data.status,
+                });
             }
 
-            sessionStorage.setItem("playersData", JSON.stringify(playersData));
-
-            navigate("/game", { state: { playersData } });
+            sessionStorage.setItem("playersData", JSON.stringify(registeredPlayers));
+            navigate("/game", { state: { playersData: registeredPlayers } });
         } catch (err) {
             console.error(err);
             setError("Failed to register players. Please try again.");

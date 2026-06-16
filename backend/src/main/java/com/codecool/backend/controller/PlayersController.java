@@ -25,7 +25,7 @@ public class PlayersController {
         return service.getAll();
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/name/{name}")
     public Player getByName(@PathVariable String name) {
         return service.getByName(name);
     }
@@ -36,9 +36,9 @@ public class PlayersController {
         return service.create(body);
     }
 
-    @PatchMapping("/{name}")
-    public Player patch(@PathVariable String name, @RequestBody PlayerPatchRequest body) {
-        return service.patch(name, body);
+    @PatchMapping("/{id}")
+    public Player patch(@PathVariable String id, @RequestBody PlayerPatchRequest body) {
+        return service.patchById(id, body);
     }
 
     @DeleteMapping

@@ -53,10 +53,10 @@ const GameCanvas = ({ players, onExit }) => {
     const coins = useRef([]);
     const levelTransitioning = useRef(false);
 
-    const getPlayerNameByIndex = useCallback(
+    const getPlayerIdByIndex = useCallback(
         (index) => {
-            if (Array.isArray(players) && players[index]?.name) {
-                return players[index].name;
+            if (Array.isArray(players) && players[index]?.playerId) {
+                return players[index].playerId;
             }
 
             return null;
@@ -229,10 +229,10 @@ const GameCanvas = ({ players, onExit }) => {
 
                         if (next <= 0) {
                             playersArr.forEach((pObj) => {
-                                const playerName = getPlayerNameByIndex(pObj.idx);
+                                const playerId = getPlayerIdByIndex(pObj.idx);
 
-                                if (playerName) {
-                                    patchPlayer(playerName, {
+                                if (playerId) {
+                                    patchPlayer(playerId, {
                                         hp: 0,
                                         status: "dead",
                                     }).catch((error) => {
@@ -304,10 +304,10 @@ const GameCanvas = ({ players, onExit }) => {
 
                     copy[collectedBy] = nextCoins;
 
-                    const playerName = getPlayerNameByIndex(collectedBy);
+                    const playerId = getPlayerIdByIndex(collectedBy);
 
-                    if (playerName) {
-                        patchPlayer(playerName, { coins: nextCoins }).catch((error) => {
+                    if (playerId) {
+                        patchPlayer(playerId, { coins: nextCoins }).catch((error) => {
                             console.error("Could not update player coins:", error);
                         });
                     }
@@ -345,7 +345,7 @@ const GameCanvas = ({ players, onExit }) => {
         resetKeys,
         loadLevel,
         currentLevelNumber,
-        getPlayerNameByIndex,
+        getPlayerIdByIndex,
     ]);
 
     useGameLoop(drawFrame, !gameOver && !!level);

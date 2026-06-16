@@ -30,6 +30,15 @@ public class PlayerService {
                 .orElseThrow(() -> new NotFoundException("Player not found: " + name));
     }
 
+    public Player patchById(String id, PlayerPatchRequest body) {
+        Player p = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Player not found: " + id));
+
+        applyPatch(p, body);
+
+        return repository.save(p);
+    }
+
     public Player create(PlayerCreateRequest body) {
         Player p = new Player();
         p.setName(body.name());
@@ -40,19 +49,26 @@ public class PlayerService {
         return repository.save(p);
     }
 
-    public Player patch(String name, PlayerPatchRequest body) {
-        Player p = getByName(name);
+    private void applyPatch(Player p, PlayerPatchRequest body) {
+        if (body.hp() != null) {
+            p.setHp(Math.max(0, body.hp()));
+        }
 
-        if (body.hp() != null) p.setHp(Math.max(0, body.hp()));
-        if (body.coins() != null) p.setCoins(Math.max(0, body.coins()));
-        if (body.shield() != null) p.setShield(body.shield());
+        if (body.coins() != null) {
+            p.setCoins(Math.max(0, body.coins()));
+        }
+
+        if (body.shield() != null) {
+            p.setShield(body.shield());
+        }
+
         if (body.status() != null) {
             if (!ALLOWED_STATUS.contains(body.status())) {
                 throw new IllegalArgumentException("Invalid status value");
             }
+
             p.setStatus(body.status());
         }
-        return repository.save(p);
     }
 
     public void deleteByStatus(String status) {
