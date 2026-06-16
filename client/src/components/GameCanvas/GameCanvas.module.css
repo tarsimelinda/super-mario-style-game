@@ -2,6 +2,20 @@
     position: relative;
 }
 
+.page {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.gameArea {
+    position: relative;
+}
+
+.sidebar {
+    min-width: 220px;
+}
+
 .canvas {
     border: 1px solid var(--border, black);
     display: block;

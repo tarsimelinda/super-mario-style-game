@@ -405,34 +405,38 @@ const GameCanvas = ({ players, onExit }) => {
     }
 
     return (
-        <div className={styles.container}>
-            <Scoreboard
-                players={players}
-                coinsCollected={coinsCollected}
-                currentLevelCoinsCollected={currentLevelCoinsCollected}
-                totalCoins={level.coins.length}
-                lives={lives}
-                playerCount={playerCount}
-                levelNumber={currentLevelNumber}
-            />
+        <div className={styles.page}>
+            <div className={styles.gameArea}>
+                {gameOver && (
+                    <GameOver
+                        players={players}
+                        onRestart={handleRestart}
+                        onExit={handleExit}
+                        finalScore={coinsCollected}
+                    />
+                )}
 
-            {gameOver && (
-                <GameOver
-                    players={players}
-                    onRestart={handleRestart}
-                    onExit={handleExit}
-                    finalScore={coinsCollected}
+                <canvas
+                    ref={canvasRef}
+                    width={GAME_CONSTANTS.canvasWidth}
+                    height={GAME_CONSTANTS.canvasHeight}
+                    className={styles.canvas}
+                    role="application"
+                    aria-label="Game canvas"
                 />
-            )}
+            </div>
 
-            <canvas
-                ref={canvasRef}
-                width={GAME_CONSTANTS.canvasWidth}
-                height={GAME_CONSTANTS.canvasHeight}
-                className={styles.canvas}
-                role="application"
-                aria-label="Game canvas"
-            />
+            <aside className={styles.sidebar}>
+                <Scoreboard
+                    players={players}
+                    coinsCollected={coinsCollected}
+                    currentLevelCoinsCollected={currentLevelCoinsCollected}
+                    totalCoins={level.coins.length}
+                    lives={lives}
+                    playerCount={playerCount}
+                    levelNumber={currentLevelNumber}
+                />
+            </aside>
         </div>
     );
 };
