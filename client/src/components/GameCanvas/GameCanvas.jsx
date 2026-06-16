@@ -10,6 +10,7 @@ import GameOver from "../GameOver/GameOver";
 import Scoreboard from "../Scoreboard/Scoreboard";
 import { GAME_CONSTANTS } from "../../game/config";
 import { fetchRandomLevel } from "../../api/levelApi";
+import { patchPlayer } from "../../api/players";
 import styles from "./GameCanvas.module.css";
 
 const GameCanvas = ({ players, onExit }) => {
@@ -51,6 +52,17 @@ const GameCanvas = ({ players, onExit }) => {
     const enemies = useRef([]);
     const coins = useRef([]);
     const levelTransitioning = useRef(false);
+
+    const getPlayerNameByIndex = useCallback(
+        (index) => {
+            if (Array.isArray(players) && players[index]?.name) {
+                return players[index].name;
+            }
+
+            return null;
+        },
+        [players]
+    );
 
     const loadLevel = useCallback(async (levelNumber) => {
         try {
@@ -216,6 +228,19 @@ const GameCanvas = ({ players, onExit }) => {
                         const next = prevLives - 1;
 
                         if (next <= 0) {
+                            playersArr.forEach((pObj) => {
+                                const playerName = getPlayerNameByIndex(pObj.idx);
+
+                                if (playerName) {
+                                    patchPlayer(playerName, {
+                                        hp: 0,
+                                        status: "dead",
+                                    }).catch((error) => {
+                                        console.error("Could not mark player as dead:", error);
+                                    });
+                                }
+                            });
+
                             setGameOver(true);
                         } else {
                             const playerStart = level.playerStart || { x: 50, y: 200 };
@@ -275,7 +300,18 @@ const GameCanvas = ({ players, onExit }) => {
             if (collectedBy !== -1) {
                 setCoinsCollected((prev) => {
                     const copy = [...prev];
-                    copy[collectedBy] = (copy[collectedBy] || 0) + 1;
+                    const nextCoins = (copy[collectedBy] || 0) + 1;
+
+                    copy[collectedBy] = nextCoins;
+
+                    const playerName = getPlayerNameByIndex(collectedBy);
+
+                    if (playerName) {
+                        patchPlayer(playerName, { coins: nextCoins }).catch((error) => {
+                            console.error("Could not update player coins:", error);
+                        });
+                    }
+
                     return copy;
                 });
 
@@ -309,6 +345,7 @@ const GameCanvas = ({ players, onExit }) => {
         resetKeys,
         loadLevel,
         currentLevelNumber,
+        getPlayerNameByIndex,
     ]);
 
     useGameLoop(drawFrame, !gameOver && !!level);
