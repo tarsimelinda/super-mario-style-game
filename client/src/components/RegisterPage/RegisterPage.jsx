@@ -3,9 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import styles from "./RegisterPage.module.css";
 import PlayerCard from "./PlayerCard";
 import { validatePlayers } from "../../utils/validation";
-import { createUser } from "../../api/users";
-import { createPlayer } from "../../api/players";
 import { fetchCharacters } from "../../api/characters";
+import { registerPlayer } from "../../api/registrations";
 
 export default function RegisterPage() {
     const { players } = useParams();
@@ -63,40 +62,25 @@ export default function RegisterPage() {
             const registeredPlayers = [];
 
             for (const player of playersData) {
-                const userResponse = await createUser({
+                const registrationResponse = await registerPlayer({
                     name: player.name,
                     character: player.character,
                 });
 
-                if (!userResponse.ok) {
-                    console.error("User creation failed:", userResponse);
-                    throw new Error("One or more user registrations failed.");
-                }
-
-                const playerResponse = await createPlayer({
-                    userId: userResponse.data.id,
-                    name: player.name,
-                    hp: 3,
-                    coins: 0,
-                });
-
-                if (!playerResponse.ok) {
-                    console.error("Player creation failed:", playerResponse);
+                if (!registrationResponse.ok) {
+                    console.error("Registration failed:", registrationResponse);
                     throw new Error("One or more player registrations failed.");
                 }
 
-                const selectedCharacter = characters.find(
-                    (character) => character.key === player.character
-                );
-
                 registeredPlayers.push({
-                    ...player,
-                    characterColor: selectedCharacter?.color,
-                    userId: userResponse.data.id,
-                    playerId: playerResponse.data.id,
-                    hp: playerResponse.data.hp,
-                    coins: playerResponse.data.coins,
-                    status: playerResponse.data.status,
+                    name: registrationResponse.data.name,
+                    character: registrationResponse.data.character,
+                    characterColor: registrationResponse.data.characterColor,
+                    userId: registrationResponse.data.userId,
+                    playerId: registrationResponse.data.playerId,
+                    hp: registrationResponse.data.hp,
+                    coins: registrationResponse.data.coins,
+                    status: registrationResponse.data.status,
                 });
             }
 
