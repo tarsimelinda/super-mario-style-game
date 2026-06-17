@@ -20,10 +20,13 @@ class Enemy extends Character {
         this.hp = hp;
         this.color = color;
         this.canJump = canJump;
+
+        this.baseY = y;
+        this.jumpPhase = Math.random() * Math.PI * 2;
     }
 
     draw(ctx) {
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = this.color || "blue";
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
@@ -32,6 +35,11 @@ class Enemy extends Character {
 
         if (this.x + this.width >= this.canvasWidth || this.x <= 0) {
             this.velocityX *= -1;
+        }
+
+        if (this.canJump) {
+            this.jumpPhase += 0.08;
+            this.y = this.baseY + Math.sin(this.jumpPhase) * 20;
         }
     }
 
