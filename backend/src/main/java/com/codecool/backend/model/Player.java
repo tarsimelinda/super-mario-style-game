@@ -15,7 +15,5 @@ public class Player {
     private String name;
     private int hp;
     private int coins;
-    private Boolean shield = false;
     private String status;
 }
-

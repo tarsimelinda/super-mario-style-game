@@ -29,10 +29,4 @@ public class EnemiesController {
     public Enemy create(@Valid @RequestBody EnemyCreateRequest body) {
         return service.create(body);
     }
-
-    @DeleteMapping("/zero-hp")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteZeroHp() {
-        service.deleteZeroHp();
-    }
 }

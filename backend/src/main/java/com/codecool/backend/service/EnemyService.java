@@ -27,10 +27,7 @@ public class EnemyService {
         e.setHp(body.hp());
         e.setColor(body.color());
         e.setCanJump(Boolean.TRUE.equals(body.canJump()));
-        return repository.save(e);
-    }
 
-    public long deleteZeroHp() {
-        return repository.deleteByHp(0);
+        return repository.save(e);
     }
 }

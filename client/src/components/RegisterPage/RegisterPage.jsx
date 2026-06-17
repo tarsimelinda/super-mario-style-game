@@ -57,7 +57,6 @@ export default function RegisterPage() {
                     name: player.name,
                     hp: 3,
                     coins: 0,
-                    shield: false,
                 });
 
                 if (!playerResponse.ok) {
