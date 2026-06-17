@@ -1,118 +1,90 @@
 import { useRef, useState, useMemo, useEffect, useCallback } from "react";
+
 import useKeyboardControls from "../../hooks/useKeyboardControls";
 import useGameLoop from "../../hooks/useGameLoop";
 import usePhysicsEngine from "../../hooks/usePhysicsEngine";
-import Player from "../../game/Player";
-import Enemy from "../../game/Enemy";
-import Platform from "../../game/Platform";
-import Coins from "../../game/Coins";
-import GameOver from "../GameOver/GameOver";
-import Scoreboard from "../Scoreboard/Scoreboard";
+import useLevelManager from "../../hooks/useLevelManager";
+import usePlayerMeta from "../../hooks/usePlayerMeta";
+
 import { GAME_CONSTANTS } from "../../game/config";
-import { fetchRandomLevel } from "../../api/levelApi";
+import {
+    createPlatforms,
+    createPlayers,
+    createEnemies,
+    createCoins,
+    getActivePlayers,
+} from "../../game/factories";
+import { drawGameObjects } from "../../game/renderer";
+import { collectCoins } from "../../game/collisions";
+
 import { patchPlayer } from "../../api/players";
 import { patchUserCheckpoint } from "../../api/users";
+
+import GameStatusOverlay from "./GameStatusOverlay";
+import GameSidebar from "./GameSidebar";
 import styles from "./GameCanvas.module.css";
 
 const GameCanvas = ({ players, onExit }) => {
+    const canvasRef = useRef(null);
+
+    const player1 = useRef(null);
+    const player2 = useRef(null);
+    const enemies = useRef([]);
+    const coins = useRef([]);
+    const didStartRun = useRef(false);
+
     const [gameOver, setGameOver] = useState(false);
     const [coinsCollected, setCoinsCollected] = useState([]);
     const [currentLevelCoinsCollected, setCurrentLevelCoinsCollected] = useState(0);
     const [lives, setLives] = useState(3);
-    const [level, setLevel] = useState(null);
-    const [loadingLevel, setLoadingLevel] = useState(true);
-    const [levelError, setLevelError] = useState(null);
-    const [currentLevelNumber, setCurrentLevelNumber] = useState(1);
     const [paused, setPaused] = useState(false);
-    const [levelComplete, setLevelComplete] = useState(false);
 
-    const canvasRef = useRef(null);
+    const {
+        playerCount,
+        getPlayerIdByIndex,
+        getUserIdByIndex,
+        getPlayerColor,
+    } = usePlayerMeta(players);
 
-    const playerCount = Array.isArray(players) ? players.length : players;
-    const player1 = useRef(null);
-    const player2 = useRef(null);
+    const {
+        level,
+        loadingLevel,
+        levelError,
+        currentLevelNumber,
+        levelComplete,
+        setLevelComplete,
+        loadLevel,
+        levelTransitioning,
+        levelTransitionTimeout,
+        clearLevelTransitionTimeout,
+    } = useLevelManager();
 
     const { keys1, keys2, resetKeys } = useKeyboardControls(playerCount);
+
     const { physics, applyGravity } = usePhysicsEngine(
         GAME_CONSTANTS.gravity,
         GAME_CONSTANTS.jumpStrength
     );
 
     const platforms = useMemo(() => {
-        if (!level) return [];
-
-        return level.platforms.map(
-            (platform) =>
-                new Platform(
-                    platform.x,
-                    platform.y,
-                    platform.width,
-                    platform.height
-                )
-        );
+        return createPlatforms(level);
     }, [level]);
 
-    const enemies = useRef([]);
-    const coins = useRef([]);
-    const levelTransitioning = useRef(false);
-    const levelTransitionTimeout = useRef(null);
+    const initGame = useCallback(() => {
+        if (!level) return;
 
-    const clearLevelTransitionTimeout = useCallback(() => {
-        if (levelTransitionTimeout.current) {
-            clearTimeout(levelTransitionTimeout.current);
-            levelTransitionTimeout.current = null;
-        }
-    }, []);
+        const createdPlayers = createPlayers(level, playerCount);
 
-    const getPlayerIdByIndex = useCallback(
-        (index) => {
-            if (Array.isArray(players) && players[index]?.playerId) {
-                return players[index].playerId;
-            }
+        player1.current = createdPlayers.player1;
+        player2.current = createdPlayers.player2;
+        enemies.current = createEnemies(level);
+        coins.current = createCoins(level);
 
-            return null;
-        },
-        [players]
-    );
-
-    const getUserIdByIndex = useCallback(
-        (index) => {
-            if (Array.isArray(players) && players[index]?.userId) {
-                return players[index].userId;
-            }
-
-            return null;
-        },
-        [players]
-    );
-
-    const getPlayerColor = useCallback(
-        (index) => {
-            return players[index]?.characterColor || (index === 0 ? "red" : "cyan");
-        },
-        [players]
-    );
-
-    const loadLevel = useCallback(async (levelNumber) => {
-        try {
-            setLevelComplete(false);
-            setLoadingLevel(true);
-            setLevelError(null);
-            setPaused(false);
-            levelTransitioning.current = true;
-
-            const loadedLevel = await fetchRandomLevel();
-
-            setLevel(loadedLevel);
-            setCurrentLevelNumber(levelNumber);
-        } catch (error) {
-            console.error("Could not load level:", error);
-            setLevelError("Could not load level.");
-        } finally {
-            setLoadingLevel(false);
-            levelTransitioning.current = false;
-        }
-    }, []);
+        setCurrentLevelCoinsCollected(0);
+        setLives(level.lives ?? 3);
+        setGameOver(false);
+        resetKeys();
+    }, [level, playerCount, resetKeys]);
 
     const startNewRun = useCallback(() => {
         clearLevelTransitionTimeout();
@@ -123,11 +95,21 @@ const GameCanvas = ({ players, onExit }) => {
         setGameOver(false);
         setPaused(false);
         setLevelComplete(false);
+
         resetKeys();
         loadLevel(1);
-    }, [playerCount, resetKeys, loadLevel, clearLevelTransitionTimeout]);
+    }, [
+        playerCount,
+        resetKeys,
+        loadLevel,
+        setLevelComplete,
+        clearLevelTransitionTimeout,
+    ]);
 
     useEffect(() => {
+        if (didStartRun.current) return;
+
+        didStartRun.current = true;
         startNewRun();
     }, [startNewRun]);
 
@@ -137,66 +119,206 @@ const GameCanvas = ({ players, onExit }) => {
         };
     }, [clearLevelTransitionTimeout]);
 
-    const initGame = useCallback(() => {
-        if (!level) return;
-
-        const playerStart = level.playerStart || { x: 50, y: 200 };
-
-        player1.current = new Player(
-            playerStart.x,
-            playerStart.y,
-            50,
-            50,
-            5
-        );
-
-        player2.current =
-            playerCount > 1
-                ? new Player(playerStart.x + 100, playerStart.y, 50, 50, 5)
-                : null;
-
-        enemies.current = level.enemies.map(
-            (enemy) =>
-                new Enemy(
-                    enemy.x,
-                    enemy.y,
-                    enemy.width,
-                    enemy.height,
-                    enemy.speed ?? 2,
-                    GAME_CONSTANTS.canvasWidth,
-                    enemy.damage ?? 1,
-                    enemy.hp ?? 1,
-                    enemy.color ?? "blue",
-                    enemy.canJump ?? false
-                )
-        );
-
-        coins.current = level.coins.map(
-            (coin) =>
-                new Coins(
-                    coin.x,
-                    coin.y,
-                    coin.width,
-                    coin.height
-                )
-        );
-
-        setCurrentLevelCoinsCollected(0);
-        setLives(level.lives ?? 3);
-        resetKeys();
-        setGameOver(false);
-    }, [level, playerCount, resetKeys]);
-
-    const handleTogglePause = () => {
-        setPaused((prev) => !prev);
-        resetKeys();
-    };
-
     useEffect(() => {
         if (level) {
             initGame();
         }
     }, [level, initGame]);
+
+    const handleTogglePause = useCallback(() => {
+        setPaused((prev) => !prev);
+        resetKeys();
+    }, [resetKeys]);
+
+    const handleRestart = useCallback(() => {
+        startNewRun();
+    }, [startNewRun]);
+
+    const handleExit = useCallback(() => {
+        setPaused(false);
+        setLevelComplete(false);
+        clearLevelTransitionTimeout();
+
+        if (typeof onExit === "function") {
+            onExit();
+        } else {
+            initGame();
+        }
+    }, [
+        onExit,
+        initGame,
+        setLevelComplete,
+        clearLevelTransitionTimeout,
+    ]);
+
+    const syncPlayerHp = useCallback(
+        (nextLives, activePlayers) => {
+            activePlayers.forEach(({ idx }) => {
+                const playerId = getPlayerIdByIndex(idx);
+
+                if (!playerId) return;
+
+                patchPlayer(playerId, {
+                    hp: nextLives,
+                    status: nextLives <= 0 ? "dead" : "playing",
+                }).catch((error) => {
+                    console.error("Could not update player hp:", error);
+                });
+            });
+        },
+        [getPlayerIdByIndex]
+    );
+
+    const resetHitPlayer = useCallback(
+        (playerObj) => {
+            if (!level) return;
+
+            const playerStart = level.playerStart || { x: 50, y: 200 };
+            const resetX =
+                playerObj.idx === 0
+                    ? playerStart.x
+                    : playerStart.x + 100;
+
+            playerObj.player.reset(resetX, playerStart.y);
+            playerObj.player.velocityY = 0;
+            playerObj.player.canJump =
+                playerObj.player.y + playerObj.player.height >=
+                playerObj.player.groundY;
+
+            resetKeys();
+        },
+        [level, resetKeys]
+    );
+
+    const handleEnemyCollisions = useCallback(
+        (activePlayers) => {
+            let collisionHandled = false;
+
+            for (const enemy of enemies.current) {
+                if (collisionHandled) break;
+
+                for (const playerObj of activePlayers) {
+                    const player = playerObj.player;
+
+                    if (!enemy.checkCollision(player)) {
+                        continue;
+                    }
+
+                    collisionHandled = true;
+
+                    if (enemy.isStompedBy(player)) {
+                        enemy.takeDamage(1);
+
+                        player.velocityY = -8;
+                        player.canJump = false;
+
+                        enemies.current = enemies.current.filter((e) => e.hp > 0);
+                        break;
+                    }
+
+                    setLives((prevLives) => {
+                        const nextLives = Math.max(
+                            0,
+                            prevLives - (enemy.damage ?? 1)
+                        );
+
+                        syncPlayerHp(nextLives, activePlayers);
+
+                        if (nextLives <= 0) {
+                            setGameOver(true);
+                        } else {
+                            resetHitPlayer(playerObj);
+                        }
+
+                        return nextLives;
+                    });
+
+                    break;
+                }
+            }
+        },
+        [syncPlayerHp, resetHitPlayer]
+    );
+
+    const handleCoinCollisions = useCallback(
+        (activePlayers) => {
+            const { remainingCoins, collected } = collectCoins(
+                coins.current,
+                activePlayers
+            );
+
+            coins.current = remainingCoins;
+
+            collected.forEach(({ playerIndex }) => {
+                setCoinsCollected((prev) => {
+                    const copy = [...prev];
+                    const nextCoins = (copy[playerIndex] || 0) + 1;
+
+                    copy[playerIndex] = nextCoins;
+
+                    const playerId = getPlayerIdByIndex(playerIndex);
+
+                    if (playerId) {
+                        patchPlayer(playerId, { coins: nextCoins }).catch((error) => {
+                            console.error("Could not update player coins:", error);
+                        });
+                    }
+
+                    return copy;
+                });
+
+                setCurrentLevelCoinsCollected((prev) => prev + 1);
+            });
+
+            return remainingCoins;
+        },
+        [getPlayerIdByIndex]
+    );
+
+    const completeLevelIfNeeded = useCallback(
+        (remainingCoins, activePlayers) => {
+            if (!level) return;
+
+            if (
+                remainingCoins.length > 0 ||
+                (level.coins?.length ?? 0) === 0 ||
+                levelTransitioning.current
+            ) {
+                return;
+            }
+
+            levelTransitioning.current = true;
+            setLevelComplete(true);
+            resetKeys();
+
+            const nextLevelNumber = currentLevelNumber + 1;
+
+            activePlayers.forEach(({ idx }) => {
+                const userId = getUserIdByIndex(idx);
+
+                if (!userId) return;
+
+                patchUserCheckpoint(userId, nextLevelNumber).catch((error) => {
+                    console.error("Could not update user checkpoint:", error);
+                });
+            });
+
+            levelTransitionTimeout.current = window.setTimeout(() => {
+                levelTransitionTimeout.current = null;
+                loadLevel(nextLevelNumber);
+            }, 1000);
+        },
+        [
+            level,
+            currentLevelNumber,
+            getUserIdByIndex,
+            loadLevel,
+            resetKeys,
+            setLevelComplete,
+            levelTransitioning,
+            levelTransitionTimeout,
+        ]
+    );
 
     const drawFrame = useCallback(() => {
         if (gameOver || !level) return;
@@ -204,21 +326,8 @@ const GameCanvas = ({ players, onExit }) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const ctx = canvas.getContext && canvas.getContext("2d");
+        const ctx = canvas.getContext?.("2d");
         if (!ctx) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "#87ceeb";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "green";
-        ctx.fillRect(
-            0,
-            GAME_CONSTANTS.groundY,
-            canvas.width,
-            canvas.height - GAME_CONSTANTS.groundY
-        );
 
         if (keys1.current.up && player1.current) {
             physics.jump(player1.current);
@@ -228,18 +337,13 @@ const GameCanvas = ({ players, onExit }) => {
             physics.jump(player2.current);
         }
 
-        const playersArr = [];
-
-        if (player1.current) {
-            playersArr.push({ player: player1.current, idx: 0 });
-        }
-
-        if (player2.current) {
-            playersArr.push({ player: player2.current, idx: 1 });
-        }
+        const activePlayers = getActivePlayers(
+            player1.current,
+            player2.current
+        );
 
         applyGravity(
-            playersArr.map((p) => p.player),
+            activePlayers.map((p) => p.player),
             GAME_CONSTANTS.groundY,
             platforms
         );
@@ -252,187 +356,37 @@ const GameCanvas = ({ players, onExit }) => {
             player2.current.move(keys2.current, canvas.width);
         }
 
-        platforms.forEach((platform) => platform.draw(ctx));
-
-        enemies.current.forEach((enemy) => {
-            enemy.move();
-            enemy.draw(ctx);
+        drawGameObjects({
+            ctx,
+            canvas,
+            platforms,
+            enemies: enemies.current,
+            coins: coins.current,
+            players: activePlayers,
+            getPlayerColor,
         });
 
-        coins.current.forEach((coin) => coin.draw(ctx));
+        handleEnemyCollisions(activePlayers);
 
-        playersArr.forEach((pObj) =>
-            pObj.player.draw(ctx, getPlayerColor(pObj.idx))
-        );
+        const remainingCoins = handleCoinCollisions(activePlayers);
 
-        let collisionHandled = false;
-
-        for (const enemy of enemies.current) {
-            if (collisionHandled) break;
-
-            for (const pObj of playersArr) {
-                const player = pObj.player;
-
-                if (!enemy.checkCollision(player)) {
-                    continue;
-                }
-
-                collisionHandled = true;
-
-                if (enemy.isStompedBy(player)) {
-                    enemy.takeDamage(1);
-
-                    player.velocityY = -8;
-                    player.canJump = false;
-
-                    enemies.current = enemies.current.filter((e) => e.hp > 0);
-
-                    break;
-                }
-
-                setLives((prevLives) => {
-                    const next = Math.max(0, prevLives - (enemy.damage ?? 1));
-
-                    playersArr.forEach((playerObj) => {
-                        const playerId = getPlayerIdByIndex(playerObj.idx);
-
-                        if (playerId) {
-                            patchPlayer(playerId, {
-                                hp: next,
-                                status: next <= 0 ? "dead" : "playing",
-                            }).catch((error) => {
-                                console.error("Could not update player hp:", error);
-                            });
-                        }
-                    });
-
-                    if (next <= 0) {
-                        setGameOver(true);
-                    } else {
-                        const playerStart = level.playerStart || { x: 50, y: 200 };
-                        const resetX = pObj.idx === 0 ? playerStart.x : playerStart.x + 100;
-
-                        player.reset(resetX, playerStart.y);
-                        player.velocityY = 0;
-                        player.canJump =
-                            player.y + player.height >= player.groundY;
-
-                        resetKeys();
-                    }
-
-                    return next;
-                });
-
-                break;
-            }
-        }
-
-        const remaining = [];
-
-        for (const coin of coins.current) {
-            let collectedBy = -1;
-
-            for (const pObj of playersArr) {
-                const p = pObj.player;
-
-                if (
-                    p.x < coin.x + coin.width &&
-                    p.x + p.width > coin.x &&
-                    p.y < coin.y + coin.height &&
-                    p.y + p.height > coin.y
-                ) {
-                    collectedBy = pObj.idx;
-                    break;
-                }
-            }
-
-            if (collectedBy !== -1) {
-                setCoinsCollected((prev) => {
-                    const copy = [...prev];
-                    const nextCoins = (copy[collectedBy] || 0) + 1;
-
-                    copy[collectedBy] = nextCoins;
-
-                    const playerId = getPlayerIdByIndex(collectedBy);
-
-                    if (playerId) {
-                        patchPlayer(playerId, { coins: nextCoins }).catch((error) => {
-                            console.error("Could not update player coins:", error);
-                        });
-                    }
-
-                    return copy;
-                });
-
-                setCurrentLevelCoinsCollected((prev) => prev + 1);
-            } else {
-                remaining.push(coin);
-            }
-        }
-
-        coins.current = remaining;
-
-        if (
-            remaining.length === 0 &&
-            level.coins.length > 0 &&
-            !levelTransitioning.current
-        ) {
-            levelTransitioning.current = true;
-            setLevelComplete(true);
-            resetKeys();
-
-            const nextLevelNumber = currentLevelNumber + 1;
-
-            playersArr.forEach((pObj) => {
-                const userId = getUserIdByIndex(pObj.idx);
-
-                if (userId) {
-                    patchUserCheckpoint(userId, nextLevelNumber).catch((error) => {
-                        console.error("Could not update user checkpoint:", error);
-                    });
-                }
-            });
-
-            levelTransitionTimeout.current = window.setTimeout(() => {
-                levelTransitionTimeout.current = null;
-                loadLevel(nextLevelNumber);
-            }, 1000);
-        }
-
+        completeLevelIfNeeded(remainingCoins, activePlayers);
     }, [
         gameOver,
         level,
-        playerCount,
         keys1,
         keys2,
+        playerCount,
         physics,
         applyGravity,
         platforms,
-        resetKeys,
-        loadLevel,
-        currentLevelNumber,
-        getPlayerIdByIndex,
-        getUserIdByIndex,
         getPlayerColor,
+        handleEnemyCollisions,
+        handleCoinCollisions,
+        completeLevelIfNeeded,
     ]);
 
     useGameLoop(drawFrame, !gameOver && !!level && !paused && !levelComplete);
-
-    const handleRestart = () => {
-        startNewRun();
-    };
-
-    const handleExit = () => {
-        setPaused(false);
-        setLevelComplete(false);
-        clearLevelTransitionTimeout();
-
-        if (typeof onExit === "function") {
-            onExit();
-        } else {
-            initGame();
-        }
-    };
 
     if (loadingLevel) {
         return <div className={styles.container}>Loading level...</div>;
@@ -449,28 +403,15 @@ const GameCanvas = ({ players, onExit }) => {
     return (
         <div className={styles.page}>
             <div className={styles.gameArea}>
-
-                {paused && !gameOver && (
-                    <div className={styles.pauseOverlay}>
-                        PAUSED
-                    </div>
-                )}
-
-                {levelComplete && !gameOver && (
-                    <div className={styles.levelCompleteOverlay}>
-                        <div>Level complete!</div>
-                        <small>Loading next level...</small>
-                    </div>
-                )}
-
-                {gameOver && (
-                    <GameOver
-                        players={players}
-                        onRestart={handleRestart}
-                        onExit={handleExit}
-                        finalScore={coinsCollected}
-                    />
-                )}
+                <GameStatusOverlay
+                    paused={paused}
+                    gameOver={gameOver}
+                    levelComplete={levelComplete}
+                    players={players}
+                    coinsCollected={coinsCollected}
+                    onRestart={handleRestart}
+                    onExit={handleExit}
+                />
 
                 <canvas
                     ref={canvasRef}
@@ -482,44 +423,20 @@ const GameCanvas = ({ players, onExit }) => {
                 />
             </div>
 
-            <aside className={styles.sidebar}>
-                <Scoreboard
-                    players={players}
-                    coinsCollected={coinsCollected}
-                    currentLevelCoinsCollected={currentLevelCoinsCollected}
-                    totalCoins={level.coins.length}
-                    lives={lives}
-                    playerCount={playerCount}
-                    levelNumber={currentLevelNumber}
-                />
-
-                <div className={styles.sidebarActions}>
-                    <button
-                        type="button"
-                        className="btn"
-                        onClick={handleTogglePause}
-                        disabled={gameOver}
-                    >
-                        {paused ? "Resume" : "Pause"}
-                    </button>
-
-                    <button
-                        type="button"
-                        className="btn"
-                        onClick={handleRestart}
-                    >
-                        Restart run
-                    </button>
-
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={handleExit}
-                    >
-                        Main menu
-                    </button>
-                </div>
-            </aside>
+            <GameSidebar
+                players={players}
+                coinsCollected={coinsCollected}
+                currentLevelCoinsCollected={currentLevelCoinsCollected}
+                totalCoins={level.coins?.length ?? 0}
+                lives={lives}
+                playerCount={playerCount}
+                levelNumber={currentLevelNumber}
+                paused={paused}
+                gameOver={gameOver}
+                onTogglePause={handleTogglePause}
+                onRestart={handleRestart}
+                onExit={handleExit}
+            />
         </div>
     );
 };

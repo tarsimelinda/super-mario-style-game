@@ -5,6 +5,7 @@ import PlayerCard from "./PlayerCard";
 import { validatePlayers } from "../../utils/validation";
 import { fetchCharacters } from "../../api/characters";
 import { registerPlayer } from "../../api/registrations";
+import { registerPlayers } from "../../api/registrationFlow";
 
 export default function RegisterPage() {
     const { players } = useParams();
@@ -59,30 +60,7 @@ export default function RegisterPage() {
         setError(null);
 
         try {
-            const registeredPlayers = [];
-
-            for (const player of playersData) {
-                const registrationResponse = await registerPlayer({
-                    name: player.name,
-                    character: player.character,
-                });
-
-                if (!registrationResponse.ok) {
-                    console.error("Registration failed:", registrationResponse);
-                    throw new Error("One or more player registrations failed.");
-                }
-
-                registeredPlayers.push({
-                    name: registrationResponse.data.name,
-                    character: registrationResponse.data.character,
-                    characterColor: registrationResponse.data.characterColor,
-                    userId: registrationResponse.data.userId,
-                    playerId: registrationResponse.data.playerId,
-                    hp: registrationResponse.data.hp,
-                    coins: registrationResponse.data.coins,
-                    status: registrationResponse.data.status,
-                });
-            }
+            const registeredPlayers = await registerPlayers(playersData);
 
             sessionStorage.setItem("playersData", JSON.stringify(registeredPlayers));
             navigate("/game", { state: { playersData: registeredPlayers } });

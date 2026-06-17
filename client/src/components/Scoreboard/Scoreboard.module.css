@@ -36,14 +36,6 @@
     flex: 0 0 8px;
 }
 
-.red {
-    background: #ff4d4f;
-}
-
-.cyan {
-    background: #2dd4d4;
-}
-
 .total {
     margin-top: 8px;
     font-size: 12px;
