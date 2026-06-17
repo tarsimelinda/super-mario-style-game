@@ -22,7 +22,12 @@ public class FilterConfig {
     public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration(RateLimitFilter filter) {
         FilterRegistrationBean<RateLimitFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(filter);
-        bean.addUrlPatterns("/api/users", "/api/users/*");
+        bean.addUrlPatterns(
+                "/api/users",
+                "/api/players",
+                "/api/characters",
+                "/api/enemies"
+        );
         bean.setOrder(2);
         return bean;
     }

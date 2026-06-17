@@ -38,6 +38,11 @@ public class RateLimitFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
+        if (!"POST".equalsIgnoreCase(request.getMethod())) {
+            chain.doFilter(req, res);
+            return;
+        }
+
         String ip = request.getRemoteAddr();
         Bucket bucket = resolveBucket(ip);
 
@@ -49,10 +54,10 @@ public class RateLimitFilter implements Filter {
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write("""
-        {
-          "code": "RATE_LIMIT_EXCEEDED",
-          "details": "Too many requests. Please try again later."
-        }
-        """);
+    {
+      "code": "RATE_LIMIT_EXCEEDED",
+      "details": "Too many requests. Please try again later."
+    }
+    """);
     }
 }
