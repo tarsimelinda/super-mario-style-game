@@ -19,6 +19,14 @@ export default function Scoreboard({
         return `Player ${index + 1}`;
     };
 
+    const getPlayerColor = (index) => {
+        if (Array.isArray(players) && players[index]?.characterColor) {
+            return players[index].characterColor;
+        }
+
+        return index === 0 ? "red" : "cyan";
+    };
+
     return (
         <div className={styles.container} aria-live="polite" aria-label="Scoreboard">
             <div className={styles.title}>Score</div>
@@ -31,7 +39,8 @@ export default function Scoreboard({
                 {Array.from({ length: playerCount }).map((_, i) => (
                     <div key={i} className={styles.playerRow}>
                         <span
-                            className={`${styles.dot} ${i === 0 ? styles.red : styles.cyan}`}
+                            className={styles.dot}
+                            style={{ backgroundColor: getPlayerColor(i) }}
                             aria-hidden
                         />
                         {getPlayerName(i)}: {coinsCollected[i] ?? 0} coins
