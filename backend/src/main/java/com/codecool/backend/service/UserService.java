@@ -12,9 +12,14 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository repository;
+    private final CharacterOptionService characterOptionService;
 
-    public UserService(UserRepository repository) {
+    public UserService(
+            UserRepository repository,
+            CharacterOptionService characterOptionService
+    ) {
         this.repository = repository;
+        this.characterOptionService = characterOptionService;
     }
 
     public List<User> getAll() {
@@ -22,10 +27,17 @@ public class UserService {
     }
 
     public User create(UserCreateRequest body) {
+        String characterKey = body.character().trim().toLowerCase();
+
+        if (!characterOptionService.existsByKey(characterKey)) {
+            throw new IllegalArgumentException("Invalid character: " + body.character());
+        }
+
         User u = new User();
         u.setName(body.name());
-        u.setCharacter(body.character());
+        u.setCharacter(characterKey);
         u.setCheckpoint(body.checkpoint() != null ? body.checkpoint() : 1);
+
         return repository.save(u);
     }
 
