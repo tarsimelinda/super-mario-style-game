@@ -64,4 +64,22 @@ public class CharacterOptionService {
                 new CharacterOption(null, "momo", "Momo", "purple")
         );
     }
+
+    public CharacterOption getByKey(String key) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException("Character is required");
+        }
+
+        String normalizedKey = key.trim().toLowerCase();
+
+        return repository.findAll().stream()
+                .filter(character -> character.getKey().equals(normalizedKey))
+                .findFirst()
+                .orElseGet(() ->
+                        getFallbackCharacters().stream()
+                                .filter(character -> character.getKey().equals(normalizedKey))
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid character: " + key))
+                );
+    }
 }
