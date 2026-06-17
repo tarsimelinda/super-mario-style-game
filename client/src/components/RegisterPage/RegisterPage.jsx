@@ -5,6 +5,7 @@ import PlayerCard from "./PlayerCard";
 import { validatePlayers } from "../../utils/validation";
 import { createUser } from "../../api/users";
 import { createPlayer } from "../../api/players";
+import { fetchCharacters } from "../../api/characters";
 
 export default function RegisterPage() {
     const { players } = useParams();
@@ -16,6 +17,25 @@ export default function RegisterPage() {
     );
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [characters, setCharacters] = useState([]);
+    const [charactersLoading, setCharactersLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadCharacters() {
+            try {
+                setCharactersLoading(true);
+                const loadedCharacters = await fetchCharacters();
+                setCharacters(loadedCharacters);
+            } catch (error) {
+                console.error("Could not load characters:", error);
+                setError("Failed to load characters.");
+            } finally {
+                setCharactersLoading(false);
+            }
+        }
+
+        loadCharacters();
+    }, []);
 
     useEffect(() => {
         setPlayersData(Array.from({ length: playerCount }, () => ({ name: "", character: "" })));
@@ -64,8 +84,13 @@ export default function RegisterPage() {
                     throw new Error("One or more player registrations failed.");
                 }
 
+                const selectedCharacter = characters.find(
+                    (character) => character.key === player.character
+                );
+
                 registeredPlayers.push({
                     ...player,
+                    characterColor: selectedCharacter?.color,
                     userId: userResponse.data.id,
                     playerId: playerResponse.data.id,
                     hp: playerResponse.data.hp,
@@ -97,7 +122,13 @@ export default function RegisterPage() {
             </div>
             <form className={styles.form} onSubmit={onSubmit}>
                 {playersData.map((p, i) => (
-                    <PlayerCard key={i} index={i} data={p} onChange={handleChange} />
+                    <PlayerCard
+                        key={i}
+                        index={i}
+                        data={p}
+                        onChange={handleChange}
+                        characters={characters}
+                    />
                 ))}
 
                 {error && (
@@ -107,7 +138,7 @@ export default function RegisterPage() {
                 )}
 
                 <div className={styles.actions}>
-                    <button type="submit" className="btn btn-primary" disabled={loading}>
+                    <button type="submit" className="btn btn-primary" disabled={loading || charactersLoading}>
                         {loading ? "Starting..." : "Start Game"}
                     </button>
                     <button type="button" className="btn" onClick={() => navigate("/")}>

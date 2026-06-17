@@ -1,6 +1,6 @@
 import styles from "./RegisterPage.module.css";
 
-export default function PlayerCard({ index, data, onChange }) {
+export default function PlayerCard({ index, data, onChange, characters = [] }) {
     const nameId = `player-${index}-name`;
     const characterId = `player-${index}-character`;
 
@@ -26,17 +26,22 @@ export default function PlayerCard({ index, data, onChange }) {
             <label className={styles.label} htmlFor={characterId}>
                 Character
             </label>
-            <input
+
+            <select
                 id={characterId}
-                type="text"
                 className={styles.input}
-                placeholder="Character"
                 value={data.character}
                 onChange={(e) => onChange(index, "character", e.target.value)}
-                maxLength={50}
-                autoComplete="off"
                 required
-            />
+            >
+                <option value="">Choose a character</option>
+
+                {characters.map((character) => (
+                    <option key={character.key} value={character.key}>
+                        {character.displayName}
+                    </option>
+                ))}
+            </select>
         </div>
     );
 }

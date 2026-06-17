@@ -86,6 +86,13 @@ const GameCanvas = ({ players, onExit }) => {
         [players]
     );
 
+    const getPlayerColor = useCallback(
+        (index) => {
+            return players[index]?.characterColor || (index === 0 ? "red" : "cyan");
+        },
+        [players]
+    );
+
     const loadLevel = useCallback(async (levelNumber) => {
         try {
             setLevelComplete(false);
@@ -255,7 +262,7 @@ const GameCanvas = ({ players, onExit }) => {
         coins.current.forEach((coin) => coin.draw(ctx));
 
         playersArr.forEach((pObj) =>
-            pObj.player.draw(ctx, pObj.idx === 0 ? "red" : "cyan")
+            pObj.player.draw(ctx, getPlayerColor(pObj.idx))
         );
 
         let collisionHandled = false;
@@ -406,6 +413,7 @@ const GameCanvas = ({ players, onExit }) => {
         currentLevelNumber,
         getPlayerIdByIndex,
         getUserIdByIndex,
+        getPlayerColor,
     ]);
 
     useGameLoop(drawFrame, !gameOver && !!level && !paused && !levelComplete);
