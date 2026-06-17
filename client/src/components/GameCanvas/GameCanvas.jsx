@@ -24,6 +24,7 @@ const GameCanvas = ({ players, onExit }) => {
     const [levelError, setLevelError] = useState(null);
     const [currentLevelNumber, setCurrentLevelNumber] = useState(1);
     const [paused, setPaused] = useState(false);
+    const [levelComplete, setLevelComplete] = useState(false);
 
     const canvasRef = useRef(null);
 
@@ -54,6 +55,14 @@ const GameCanvas = ({ players, onExit }) => {
     const enemies = useRef([]);
     const coins = useRef([]);
     const levelTransitioning = useRef(false);
+    const levelTransitionTimeout = useRef(null);
+
+    const clearLevelTransitionTimeout = useCallback(() => {
+        if (levelTransitionTimeout.current) {
+            clearTimeout(levelTransitionTimeout.current);
+            levelTransitionTimeout.current = null;
+        }
+    }, []);
 
     const getPlayerIdByIndex = useCallback(
         (index) => {
@@ -79,6 +88,7 @@ const GameCanvas = ({ players, onExit }) => {
 
     const loadLevel = useCallback(async (levelNumber) => {
         try {
+            setLevelComplete(false);
             setLoadingLevel(true);
             setLevelError(null);
             setPaused(false);
@@ -98,18 +108,27 @@ const GameCanvas = ({ players, onExit }) => {
     }, []);
 
     const startNewRun = useCallback(() => {
+        clearLevelTransitionTimeout();
+
         setCoinsCollected(Array.from({ length: playerCount }, () => 0));
         setCurrentLevelCoinsCollected(0);
         setLives(3);
         setGameOver(false);
         setPaused(false);
+        setLevelComplete(false);
         resetKeys();
         loadLevel(1);
-    }, [playerCount, resetKeys, loadLevel]);
+    }, [playerCount, resetKeys, loadLevel, clearLevelTransitionTimeout]);
 
     useEffect(() => {
         startNewRun();
     }, [startNewRun]);
+
+    useEffect(() => {
+        return () => {
+            clearLevelTransitionTimeout();
+        };
+    }, [clearLevelTransitionTimeout]);
 
     const initGame = useCallback(() => {
         if (!level) return;
@@ -337,6 +356,7 @@ const GameCanvas = ({ players, onExit }) => {
             !levelTransitioning.current
         ) {
             levelTransitioning.current = true;
+            setLevelComplete(true);
             resetKeys();
 
             const nextLevelNumber = currentLevelNumber + 1;
@@ -351,7 +371,10 @@ const GameCanvas = ({ players, onExit }) => {
                 }
             });
 
-            loadLevel(nextLevelNumber);
+            levelTransitionTimeout.current = window.setTimeout(() => {
+                levelTransitionTimeout.current = null;
+                loadLevel(nextLevelNumber);
+            }, 1000);
         }
 
     }, [
@@ -370,7 +393,7 @@ const GameCanvas = ({ players, onExit }) => {
         getUserIdByIndex,
     ]);
 
-    useGameLoop(drawFrame, !gameOver && !!level && !paused);
+    useGameLoop(drawFrame, !gameOver && !!level && !paused && !levelComplete);
 
     const handleRestart = () => {
         startNewRun();
@@ -378,6 +401,8 @@ const GameCanvas = ({ players, onExit }) => {
 
     const handleExit = () => {
         setPaused(false);
+        setLevelComplete(false);
+        clearLevelTransitionTimeout();
 
         if (typeof onExit === "function") {
             onExit();
@@ -405,6 +430,13 @@ const GameCanvas = ({ players, onExit }) => {
                 {paused && !gameOver && (
                     <div className={styles.pauseOverlay}>
                         PAUSED
+                    </div>
+                )}
+
+                {levelComplete && !gameOver && (
+                    <div className={styles.levelCompleteOverlay}>
+                        <div>Level complete!</div>
+                        <small>Loading next level...</small>
                     </div>
                 )}
 
