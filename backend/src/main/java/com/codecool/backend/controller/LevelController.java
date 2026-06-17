@@ -16,11 +16,6 @@ public class LevelController {
         this.levelService = levelService;
     }
 
-    @GetMapping("/default")
-    public LevelDto getDefaultLevel() {
-        return levelService.getDefaultLevel();
-    }
-
     @GetMapping("/random")
     public LevelDto getRandomLevel() {
         return levelService.getRandomLevel();
