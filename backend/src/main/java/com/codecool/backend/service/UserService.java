@@ -22,10 +22,6 @@ public class UserService {
         this.characterOptionService = characterOptionService;
     }
 
-    public List<User> getAll() {
-        return repository.findAll();
-    }
-
     public User create(UserCreateRequest body) {
         String characterKey = body.character().trim().toLowerCase();
 

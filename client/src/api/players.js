@@ -7,10 +7,6 @@ export function createPlayer(player) {
     });
 }
 
-export function getPlayerByName(name) {
-    return apiFetch(`/players/name/${encodeURIComponent(name)}`);
-}
-
 export function patchPlayer(playerId, patch) {
     return apiFetch(`/players/${encodeURIComponent(playerId)}`, {
         method: "PATCH",

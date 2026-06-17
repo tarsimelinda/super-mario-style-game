@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/players")
@@ -20,16 +19,6 @@ public class PlayersController {
         this.service = service;
     }
 
-    @GetMapping
-    public List<Player> getAll() {
-        return service.getAll();
-    }
-
-    @GetMapping("/name/{name}")
-    public Player getByName(@PathVariable String name) {
-        return service.getByName(name);
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Player create(@Valid @RequestBody PlayerCreateRequest body) {
@@ -39,11 +28,5 @@ public class PlayersController {
     @PatchMapping("/{id}")
     public Player patch(@PathVariable String id, @RequestBody PlayerPatchRequest body) {
         return service.patchById(id, body);
-    }
-
-    @DeleteMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteByStatus(@RequestParam String status) {
-        service.deleteByStatus(status);
     }
 }

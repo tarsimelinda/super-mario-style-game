@@ -7,7 +7,6 @@ import com.codecool.backend.model.Player;
 import com.codecool.backend.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -19,15 +18,6 @@ public class PlayerService {
 
     public PlayerService(PlayerRepository repository) {
         this.repository = repository;
-    }
-
-    public List<Player> getAll() {
-        return repository.findAll();
-    }
-
-    public Player getByName(String name) {
-        return repository.findByName(name)
-                .orElseThrow(() -> new NotFoundException("Player not found: " + name));
     }
 
     public Player create(PlayerCreateRequest body) {
@@ -67,7 +57,4 @@ public class PlayerService {
         }
     }
 
-    public void deleteByStatus(String status) {
-        repository.deleteByStatus(status);
-    }
 }
