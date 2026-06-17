@@ -19,11 +19,6 @@ public class EnemiesController {
         this.service = service;
     }
 
-    @GetMapping
-    public List<Enemy> getAll() {
-        return service.getAll();
-    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Enemy create(@Valid @RequestBody EnemyCreateRequest body) {

@@ -5,8 +5,6 @@ import com.codecool.backend.model.Enemy;
 import com.codecool.backend.repository.EnemyRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class EnemyService {
 
@@ -14,10 +12,6 @@ public class EnemyService {
 
     public EnemyService(EnemyRepository repository) {
         this.repository = repository;
-    }
-
-    public List<Enemy> getAll() {
-        return repository.findAll();
     }
 
     public Enemy create(EnemyCreateRequest body) {
