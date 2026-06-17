@@ -28,6 +28,12 @@ class Enemy extends Character {
     draw(ctx) {
         ctx.fillStyle = this.color || "blue";
         ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        if (this.hp > 1) {
+            ctx.fillStyle = "white";
+            ctx.font = "14px Arial";
+            ctx.fillText(this.hp, this.x + this.width / 2 - 4, this.y - 6);
+        }
     }
 
     move() {
@@ -50,6 +56,33 @@ class Enemy extends Character {
             player.y + player.height > this.y &&
             player.y < this.y + this.height
         );
+    }
+
+    isStompedBy(player) {
+        const playerBottom = player.y + player.height;
+        const previousPlayerBottom = playerBottom - player.velocityY;
+        const enemyTop = this.y;
+
+        const isFalling = player.velocityY > 0;
+        const wasAboveEnemy = previousPlayerBottom <= enemyTop + 25;
+        const isNowTouchingEnemy = playerBottom >= enemyTop;
+
+        const horizontallyOverlapping =
+            player.x + player.width > this.x + 5 &&
+            player.x < this.x + this.width - 5;
+
+        return (
+            isFalling &&
+            wasAboveEnemy &&
+            isNowTouchingEnemy &&
+            horizontallyOverlapping &&
+            this.checkCollision(player)
+        );
+    }
+
+    takeDamage(amount = 1) {
+        this.hp = Math.max(0, this.hp - amount);
+        return this.hp;
     }
 }
 

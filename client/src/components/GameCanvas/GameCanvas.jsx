@@ -264,44 +264,59 @@ const GameCanvas = ({ players, onExit }) => {
             if (collisionHandled) break;
 
             for (const pObj of playersArr) {
-                if (enemy.checkCollision(pObj.player)) {
-                    collisionHandled = true;
+                const player = pObj.player;
 
-                    setLives((prevLives) => {
-                        const next = prevLives - (enemy.damage ?? 1);
+                if (!enemy.checkCollision(player)) {
+                    continue;
+                }
 
-                        if (next <= 0) {
-                            playersArr.forEach((pObj) => {
-                                const playerId = getPlayerIdByIndex(pObj.idx);
+                collisionHandled = true;
 
-                                if (playerId) {
-                                    patchPlayer(playerId, {
-                                        hp: 0,
-                                        status: "dead",
-                                    }).catch((error) => {
-                                        console.error("Could not mark player as dead:", error);
-                                    });
-                                }
-                            });
+                if (enemy.isStompedBy(player)) {
+                    enemy.takeDamage(1);
 
-                            setGameOver(true);
-                        } else {
-                            const playerStart = level.playerStart || { x: 50, y: 200 };
-                            const resetX = pObj.idx === 0 ? playerStart.x : playerStart.x + 100;
+                    player.velocityY = -8;
+                    player.canJump = false;
 
-                            pObj.player.reset(resetX, playerStart.y);
-                            pObj.player.velocityY = 0;
-                            pObj.player.canJump =
-                                pObj.player.y + pObj.player.height >= pObj.player.groundY;
-
-                            resetKeys();
-                        }
-
-                        return next;
-                    });
+                    enemies.current = enemies.current.filter((e) => e.hp > 0);
 
                     break;
                 }
+
+                setLives((prevLives) => {
+                    const next = Math.max(0, prevLives - (enemy.damage ?? 1));
+
+                    playersArr.forEach((playerObj) => {
+                        const playerId = getPlayerIdByIndex(playerObj.idx);
+
+                        if (playerId) {
+                            patchPlayer(playerId, {
+                                hp: next,
+                                status: next <= 0 ? "dead" : "playing",
+                            }).catch((error) => {
+                                console.error("Could not update player hp:", error);
+                            });
+                        }
+                    });
+
+                    if (next <= 0) {
+                        setGameOver(true);
+                    } else {
+                        const playerStart = level.playerStart || { x: 50, y: 200 };
+                        const resetX = pObj.idx === 0 ? playerStart.x : playerStart.x + 100;
+
+                        player.reset(resetX, playerStart.y);
+                        player.velocityY = 0;
+                        player.canJump =
+                            player.y + player.height >= player.groundY;
+
+                        resetKeys();
+                    }
+
+                    return next;
+                });
+
+                break;
             }
         }
 
