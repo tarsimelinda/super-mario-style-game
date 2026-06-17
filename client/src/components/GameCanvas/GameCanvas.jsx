@@ -268,28 +268,12 @@ const GameCanvas = ({ players, onExit }) => {
                             setGameOver(true);
                         } else {
                             const playerStart = level.playerStart || { x: 50, y: 200 };
+                            const resetX = pObj.idx === 0 ? playerStart.x : playerStart.x + 100;
 
-                            if (player1.current) {
-                                player1.current.reset(playerStart.x, playerStart.y);
-                            }
-
-                            if (player2.current) {
-                                player2.current.reset(playerStart.x + 100, playerStart.y);
-                            }
-
-                            if (player1.current) {
-                                player1.current.velocityY = 0;
-                                player1.current.canJump =
-                                    player1.current.y + player1.current.height >=
-                                    player1.current.groundY;
-                            }
-
-                            if (player2.current) {
-                                player2.current.velocityY = 0;
-                                player2.current.canJump =
-                                    player2.current.y + player2.current.height >=
-                                    player2.current.groundY;
-                            }
+                            pObj.player.reset(resetX, playerStart.y);
+                            pObj.player.velocityY = 0;
+                            pObj.player.canJump =
+                                pObj.player.y + pObj.player.height >= pObj.player.groundY;
 
                             resetKeys();
                         }

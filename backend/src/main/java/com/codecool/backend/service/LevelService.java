@@ -96,7 +96,7 @@ public class LevelService {
     private List<EnemySpawnDto> getDefaultEnemies() {
         return List.of(
                 new EnemySpawnDto(500, 310, 40, 40, 2, 1, 1, "blue", false),
-                new EnemySpawnDto(300, 160, 40, 40, 3, 2, 1, "purple", false)
+                new EnemySpawnDto(300, 160, 40, 40, 3, 2, 1, "black", false)
         );
     }
 
@@ -121,8 +121,12 @@ public class LevelService {
     }
 
     private String randomEnemyColor() {
-        List<String> colors = List.of("blue", "purple", "darkred", "orange");
+        List<String> colors = List.of("blue", "purple", "darkred", "orange", "black");
         return colors.get(random.nextInt(colors.size()));
+    }
+
+    private int damageForColor(String color) {
+        return "black".equals(color) ? 2 : 1;
     }
 
     private int randomBetween(int min, int max) {
@@ -140,17 +144,21 @@ public class LevelService {
                 .filter(this::isSafeEnemyPlatform)
                 .filter(platform -> random.nextInt(100) < 35)
                 .limit(calculateEnemyCount(platforms))
-                .map(platform -> new EnemySpawnDto(
-                        platform.x() + platform.width() / 2 - ENEMY_WIDTH / 2,
-                        platform.y() - ENEMY_HEIGHT,
-                        ENEMY_WIDTH,
-                        ENEMY_HEIGHT,
-                        randomBetween(1, 3),
-                        randomBetween(1, 2),
-                        randomBetween(1, 3),
-                        randomEnemyColor(),
-                        random.nextBoolean()
-                ))
+                .map(platform -> {
+                    String color = randomEnemyColor();
+
+                    return new EnemySpawnDto(
+                            platform.x() + platform.width() / 2 - ENEMY_WIDTH / 2,
+                            platform.y() - ENEMY_HEIGHT,
+                            ENEMY_WIDTH,
+                            ENEMY_HEIGHT,
+                            randomBetween(1, 3),
+                            damageForColor(color),
+                            randomBetween(1, 3),
+                            color,
+                            random.nextBoolean()
+                    );
+                })
                 .toList();
     }
 

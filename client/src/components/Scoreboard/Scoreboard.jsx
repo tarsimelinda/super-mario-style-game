@@ -23,7 +23,9 @@ export default function Scoreboard({
         <div className={styles.container} aria-live="polite" aria-label="Scoreboard">
             <div className={styles.title}>Score</div>
             <div>Level: {levelNumber}</div>
-            <div className={styles.lives}>Lives: {lives}</div>
+            <div className={styles.lives}>
+                {playerCount > 1 ? "Team lives" : "Lives"}: {lives}
+            </div>
 
             <div>
                 {Array.from({ length: playerCount }).map((_, i) => (
