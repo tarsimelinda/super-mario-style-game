@@ -5,6 +5,8 @@ import com.codecool.backend.dto.EnemySpawnDto;
 import com.codecool.backend.dto.LevelDto;
 import com.codecool.backend.dto.PlatformDto;
 import com.codecool.backend.dto.PointDto;
+import com.codecool.backend.model.Enemy;
+import com.codecool.backend.repository.EnemyRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,8 +17,10 @@ public class LevelService {
 
     private final PlatformGeneratorService platformGeneratorService;
     private final CoinGeneratorService coinGeneratorService;
-    private final Random random = new Random();
     private final LevelValidatorService levelValidatorService;
+    private final EnemyRepository enemyRepository;
+
+    private final Random random = new Random();
 
     private static final int GROUND_Y = 550;
     private static final int PLAYER_HEIGHT = 50;
@@ -38,11 +42,13 @@ public class LevelService {
     public LevelService(
             PlatformGeneratorService platformGeneratorService,
             CoinGeneratorService coinGeneratorService,
-            LevelValidatorService levelValidatorService
+            LevelValidatorService levelValidatorService,
+            EnemyRepository enemyRepository
     ) {
         this.platformGeneratorService = platformGeneratorService;
         this.coinGeneratorService = coinGeneratorService;
         this.levelValidatorService = levelValidatorService;
+        this.enemyRepository = enemyRepository;
     }
 
     public LevelDto getDefaultLevel() {
@@ -120,24 +126,9 @@ public class LevelService {
         );
     }
 
-    private String randomEnemyColor() {
-        List<String> colors = List.of("blue", "purple", "darkred", "orange", "black");
-        return colors.get(random.nextInt(colors.size()));
-    }
-
-    private int damageForColor(String color) {
-        return "black".equals(color) ? 2 : 1;
-    }
-
-    private int randomBetween(int min, int max) {
-        if (max < min) {
-            return min;
-        }
-
-        return random.nextInt(max - min + 1) + min;
-    }
-
     private List<EnemySpawnDto> generateEnemies(List<PlatformDto> platforms) {
+        List<Enemy> enemyTypes = getEnemyTypes();
+
         return platforms.stream()
                 .skip(1)
                 .filter(platform -> platform.width() >= 90)
@@ -145,21 +136,41 @@ public class LevelService {
                 .filter(platform -> random.nextInt(100) < 35)
                 .limit(calculateEnemyCount(platforms))
                 .map(platform -> {
-                    String color = randomEnemyColor();
+                    Enemy enemyType = enemyTypes.get(random.nextInt(enemyTypes.size()));
 
                     return new EnemySpawnDto(
                             platform.x() + platform.width() / 2 - ENEMY_WIDTH / 2,
                             platform.y() - ENEMY_HEIGHT,
                             ENEMY_WIDTH,
                             ENEMY_HEIGHT,
-                            randomBetween(1, 3),
-                            damageForColor(color),
-                            randomBetween(1, 3),
-                            color,
-                            random.nextBoolean()
+                            enemyType.getSpeed(),
+                            enemyType.getDamage(),
+                            enemyType.getHp(),
+                            enemyType.getColor(),
+                            enemyType.isCanJump()
                     );
                 })
                 .toList();
+    }
+
+    private List<Enemy> getEnemyTypes() {
+        List<Enemy> enemyTypes = enemyRepository.findAll();
+
+        if (!enemyTypes.isEmpty()) {
+            return enemyTypes;
+        }
+
+        return getFallbackEnemyTypes();
+    }
+
+    private List<Enemy> getFallbackEnemyTypes() {
+        return List.of(
+                new Enemy(null, 1, 2, 1, "blue", false),
+                new Enemy(null, 1, 3, 1, "purple", true),
+                new Enemy(null, 2, 2, 2, "black", false),
+                new Enemy(null, 1, 1, 3, "darkred", false),
+                new Enemy(null, 1, 3, 2, "orange", true)
+        );
     }
 
     private boolean isSafeEnemyPlatform(PlatformDto platform) {
