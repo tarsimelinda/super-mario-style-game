@@ -22,6 +22,7 @@ public class PlayerService {
 
     public Player create(PlayerCreateRequest body) {
         Player p = new Player();
+        p.setUserId(body.userId());
         p.setName(body.name());
         p.setHp(body.hp());
         p.setCoins(body.coins());

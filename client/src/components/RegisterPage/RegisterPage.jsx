@@ -74,6 +74,7 @@ export default function RegisterPage() {
                 }
 
                 const playerResponse = await createPlayer({
+                    userId: userResponse.data.id,
                     name: player.name,
                     hp: 3,
                     coins: 0,
