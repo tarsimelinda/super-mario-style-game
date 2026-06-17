@@ -13,7 +13,6 @@ public class Player {
     private String id;
 
     private String userId;
-    private String name;
     private int hp;
     private int coins;
     private PlayerStatus status;

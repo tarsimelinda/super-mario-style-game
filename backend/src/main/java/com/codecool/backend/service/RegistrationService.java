@@ -40,7 +40,7 @@ public class RegistrationService {
         User savedUser = createUser(name, characterKey);
 
         try {
-            Player savedPlayer = createPlayer(savedUser.getId(), name);
+            Player savedPlayer = createPlayer(savedUser.getId());
             return toResponse(savedUser, savedPlayer, character);
         } catch (RuntimeException ex) {
             userRepository.deleteById(savedUser.getId());
@@ -65,13 +65,13 @@ public class RegistrationService {
         return userRepository.save(user);
     }
 
-    private Player createPlayer(String userId, String name) {
+    private Player createPlayer(String userId) {
         Player player = new Player();
         player.setUserId(userId);
-        player.setName(name);
         player.setHp(DEFAULT_HP);
         player.setCoins(DEFAULT_COINS);
         player.setStatus(PlayerStatus.PLAYING);
+
         return playerRepository.save(player);
     }
 
