@@ -1,5 +1,6 @@
 package com.codecool.backend.service;
 
+import com.codecool.backend.dto.CharacterCreateRequest;
 import com.codecool.backend.model.CharacterOption;
 import com.codecool.backend.repository.CharacterOptionRepository;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,21 @@ public class CharacterOptionService {
         }
 
         return getFallbackCharacters();
+    }
+
+    public CharacterOption create(CharacterCreateRequest body) {
+        String key = body.key().trim().toLowerCase();
+
+        if (repository.existsByKey(key)) {
+            throw new IllegalArgumentException("Character already exists: " + key);
+        }
+
+        CharacterOption character = new CharacterOption();
+        character.setKey(key);
+        character.setDisplayName(body.displayName().trim());
+        character.setColor(body.color().trim());
+
+        return repository.save(character);
     }
 
     public boolean existsByKey(String key) {
