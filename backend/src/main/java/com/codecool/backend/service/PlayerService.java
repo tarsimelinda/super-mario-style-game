@@ -13,8 +13,6 @@ public class PlayerService {
 
     private final PlayerRepository repository;
 
-    private static final Set<String> ALLOWED_STATUS = Set.of("playing", "menu", "dead");
-
     public PlayerService(PlayerRepository repository) {
         this.repository = repository;
     }
@@ -38,10 +36,6 @@ public class PlayerService {
         }
 
         if (body.status() != null) {
-            if (!ALLOWED_STATUS.contains(body.status())) {
-                throw new IllegalArgumentException("Invalid status value");
-            }
-
             p.setStatus(body.status());
         }
     }

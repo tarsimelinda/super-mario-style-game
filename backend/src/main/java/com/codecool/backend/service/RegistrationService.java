@@ -4,6 +4,7 @@ import com.codecool.backend.dto.RegistrationCreateRequest;
 import com.codecool.backend.dto.RegistrationResponse;
 import com.codecool.backend.model.CharacterOption;
 import com.codecool.backend.model.Player;
+import com.codecool.backend.model.PlayerStatus;
 import com.codecool.backend.model.User;
 import com.codecool.backend.repository.PlayerRepository;
 import com.codecool.backend.repository.UserRepository;
@@ -15,7 +16,6 @@ public class RegistrationService {
     private static final int DEFAULT_CHECKPOINT = 1;
     private static final int DEFAULT_HP = 3;
     private static final int DEFAULT_COINS = 0;
-    private static final String DEFAULT_STATUS = "playing";
 
     private final UserRepository userRepository;
     private final PlayerRepository playerRepository;
@@ -71,8 +71,7 @@ public class RegistrationService {
         player.setName(name);
         player.setHp(DEFAULT_HP);
         player.setCoins(DEFAULT_COINS);
-        player.setStatus(DEFAULT_STATUS);
-
+        player.setStatus(PlayerStatus.PLAYING);
         return playerRepository.save(player);
     }
 

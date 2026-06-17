@@ -16,5 +16,5 @@ public class Player {
     private String name;
     private int hp;
     private int coins;
-    private String status;
+    private PlayerStatus status;
 }

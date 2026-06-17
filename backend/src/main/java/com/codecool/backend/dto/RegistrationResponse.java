@@ -1,5 +1,7 @@
 package com.codecool.backend.dto;
 
+import com.codecool.backend.model.PlayerStatus;
+
 public record RegistrationResponse(
         String userId,
         String playerId,
@@ -9,6 +11,6 @@ public record RegistrationResponse(
         int checkpoint,
         int hp,
         int coins,
-        String status
+        PlayerStatus status
 ) {
 }
