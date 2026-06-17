@@ -72,14 +72,14 @@ public class CharacterOptionService {
 
         String normalizedKey = key.trim().toLowerCase();
 
-        return repository.findAll().stream()
+        return repository.findByKey(normalizedKey)
+                .orElseGet(() -> getFallbackCharacterByKey(normalizedKey, key));
+    }
+
+    private CharacterOption getFallbackCharacterByKey(String normalizedKey, String originalKey) {
+        return getFallbackCharacters().stream()
                 .filter(character -> character.getKey().equals(normalizedKey))
                 .findFirst()
-                .orElseGet(() ->
-                        getFallbackCharacters().stream()
-                                .filter(character -> character.getKey().equals(normalizedKey))
-                                .findFirst()
-                                .orElseThrow(() -> new IllegalArgumentException("Invalid character: " + key))
-                );
+                .orElseThrow(() -> new IllegalArgumentException("Invalid character: " + originalKey));
     }
 }
