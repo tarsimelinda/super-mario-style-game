@@ -18,7 +18,7 @@ public class UserService {
         User user = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found: " + id));
 
-        user.setCheckpoint(Math.max(1, checkpoint));
+        user.setCheckpoint(checkpoint);
 
         return repository.save(user);
     }
