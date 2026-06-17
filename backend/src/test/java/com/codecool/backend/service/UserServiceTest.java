@@ -1,6 +1,5 @@
 package com.codecool.backend.service;
 
-import com.codecool.backend.dto.UserCreateRequest;
 import com.codecool.backend.model.User;
 import com.codecool.backend.repository.UserRepository;
 import org.junit.jupiter.api.Test;

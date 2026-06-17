@@ -1,6 +1,5 @@
 package com.codecool.backend.service;
 
-import com.codecool.backend.dto.PlayerCreateRequest;
 import com.codecool.backend.dto.PlayerPatchRequest;
 import com.codecool.backend.exception.NotFoundException;
 import com.codecool.backend.model.Player;
@@ -18,17 +17,6 @@ public class PlayerService {
 
     public PlayerService(PlayerRepository repository) {
         this.repository = repository;
-    }
-
-    public Player create(PlayerCreateRequest body) {
-        Player p = new Player();
-        p.setUserId(body.userId());
-        p.setName(body.name());
-        p.setHp(body.hp());
-        p.setCoins(body.coins());
-        p.setStatus("playing");
-
-        return repository.save(p);
     }
 
     public Player patchById(String id, PlayerPatchRequest body) {

@@ -1,6 +1,5 @@
 package com.codecool.backend.service;
 
-import com.codecool.backend.dto.PlayerCreateRequest;
 import com.codecool.backend.dto.PlayerPatchRequest;
 import com.codecool.backend.exception.NotFoundException;
 import com.codecool.backend.model.Player;
