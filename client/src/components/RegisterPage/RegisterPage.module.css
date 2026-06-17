@@ -45,3 +45,19 @@
     color: crimson;
     margin-bottom: 12px;
 }
+
+.helpText {
+    max-width: 520px;
+    margin: 8px auto 12px;
+    line-height: 1.5;
+    color: var(--text-muted, #64748b);
+}
+
+.controlsHint {
+    max-width: 520px;
+    margin: 0 auto 20px;
+    padding: 10px 12px;
+    border-radius: var(--radius, 8px);
+    background: var(--panel-bg, rgba(0, 0, 0, 0.05));
+    font-size: 14px;
+}

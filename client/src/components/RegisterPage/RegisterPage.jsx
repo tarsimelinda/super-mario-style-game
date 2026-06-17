@@ -88,6 +88,14 @@ export default function RegisterPage() {
     return (
         <div className={styles.container}>
             <h2>Register Players</h2>
+            <p className={styles.helpText}>
+                Enter a name and choose a character for each player. Names and character
+                names can be up to 50 characters long.
+            </p>
+            <div className={styles.controlsHint}>
+                <strong>Controls:</strong> Player 1: Arrow keys
+                {playerCount > 1 && " | Player 2: W, A, S, D"}
+            </div>
             <form className={styles.form} onSubmit={onSubmit}>
                 {playersData.map((p, i) => (
                     <PlayerCard key={i} index={i} data={p} onChange={handleChange} />
