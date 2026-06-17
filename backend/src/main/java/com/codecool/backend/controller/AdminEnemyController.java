@@ -7,15 +7,13 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/enemies")
-public class EnemiesController {
+public class AdminEnemyController {
 
     private final EnemyService service;
 
-    public EnemiesController(EnemyService service) {
+    public AdminEnemyController(EnemyService service) {
         this.service = service;
     }
 
