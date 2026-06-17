@@ -38,9 +38,14 @@ public class RegistrationService {
         CharacterOption character = characterOptionService.getByKey(characterKey);
 
         User savedUser = createUser(name, characterKey);
-        Player savedPlayer = createPlayer(savedUser.getId(), name);
 
-        return toResponse(savedUser, savedPlayer, character);
+        try {
+            Player savedPlayer = createPlayer(savedUser.getId(), name);
+            return toResponse(savedUser, savedPlayer, character);
+        } catch (RuntimeException ex) {
+            userRepository.deleteById(savedUser.getId());
+            throw ex;
+        }
     }
 
     private String normalizeName(String name) {
