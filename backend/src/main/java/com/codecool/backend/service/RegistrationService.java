@@ -12,6 +12,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegistrationService {
 
+    private static final int DEFAULT_CHECKPOINT = 1;
+    private static final int DEFAULT_HP = 3;
+    private static final int DEFAULT_COINS = 0;
+    private static final String DEFAULT_STATUS = "playing";
+
     private final UserRepository userRepository;
     private final PlayerRepository playerRepository;
     private final CharacterOptionService characterOptionService;
@@ -27,37 +32,60 @@ public class RegistrationService {
     }
 
     public RegistrationResponse register(RegistrationCreateRequest body) {
-        String name = body.name().trim();
-        String characterKey = body.character().trim().toLowerCase();
+        String name = normalizeName(body.name());
+        String characterKey = normalizeCharacterKey(body.character());
 
         CharacterOption character = characterOptionService.getByKey(characterKey);
 
+        User savedUser = createUser(name, characterKey);
+        Player savedPlayer = createPlayer(savedUser.getId(), name);
+
+        return toResponse(savedUser, savedPlayer, character);
+    }
+
+    private String normalizeName(String name) {
+        return name.trim();
+    }
+
+    private String normalizeCharacterKey(String character) {
+        return character.trim().toLowerCase();
+    }
+
+    private User createUser(String name, String characterKey) {
         User user = new User();
         user.setName(name);
         user.setCharacter(characterKey);
-        user.setCheckpoint(1);
+        user.setCheckpoint(DEFAULT_CHECKPOINT);
 
-        User savedUser = userRepository.save(user);
+        return userRepository.save(user);
+    }
 
+    private Player createPlayer(String userId, String name) {
         Player player = new Player();
-        player.setUserId(savedUser.getId());
+        player.setUserId(userId);
         player.setName(name);
-        player.setHp(3);
-        player.setCoins(0);
-        player.setStatus("playing");
+        player.setHp(DEFAULT_HP);
+        player.setCoins(DEFAULT_COINS);
+        player.setStatus(DEFAULT_STATUS);
 
-        Player savedPlayer = playerRepository.save(player);
+        return playerRepository.save(player);
+    }
 
+    private RegistrationResponse toResponse(
+            User user,
+            Player player,
+            CharacterOption character
+    ) {
         return new RegistrationResponse(
-                savedUser.getId(),
-                savedPlayer.getId(),
-                savedUser.getName(),
-                savedUser.getCharacter(),
+                user.getId(),
+                player.getId(),
+                user.getName(),
+                user.getCharacter(),
                 character.getColor(),
-                savedUser.getCheckpoint(),
-                savedPlayer.getHp(),
-                savedPlayer.getCoins(),
-                savedPlayer.getStatus()
+                user.getCheckpoint(),
+                player.getHp(),
+                player.getCoins(),
+                player.getStatus()
         );
     }
 }
