@@ -3,6 +3,7 @@ package com.codecool.backend.controller;
 import com.codecool.backend.dto.PlayerPatchRequest;
 import com.codecool.backend.model.Player;
 import com.codecool.backend.service.PlayerService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -17,7 +18,7 @@ public class PlayersController {
     }
 
     @PatchMapping("/{id}")
-    public Player patch(@PathVariable String id, @RequestBody PlayerPatchRequest body) {
+    public Player patch(@PathVariable String id, @Valid @RequestBody PlayerPatchRequest body) {
         return service.patchById(id, body);
     }
 }
