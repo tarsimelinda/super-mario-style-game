@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 
 @Service
 public class PlatformGeneratorService {
@@ -27,12 +26,16 @@ public class PlatformGeneratorService {
     private static final int ZONE_COUNT = 6;
     private static final int MAX_ATTEMPTS = 4000;
 
+    private final RandomService randomService;
+
     private final PlatformReachabilityService platformReachabilityService;
 
-    private final Random random = new Random();
-
-    public PlatformGeneratorService(PlatformReachabilityService platformReachabilityService) {
+    public PlatformGeneratorService(
+            PlatformReachabilityService platformReachabilityService,
+            RandomService randomService
+    ) {
         this.platformReachabilityService = platformReachabilityService;
+        this.randomService = randomService;
     }
 
     public List<PlatformDto> generatePlatforms() {
@@ -41,7 +44,7 @@ public class PlatformGeneratorService {
         PlatformDto startPlatform = new PlatformDto(80, 460, 220, GameConstants.PLATFORM_HEIGHT);
         platforms.add(startPlatform);
 
-        int targetPlatformCount = randomBetween(MIN_PLATFORM_COUNT, MAX_PLATFORM_COUNT);
+        int targetPlatformCount = randomService.betweenInclusive(MIN_PLATFORM_COUNT, MAX_PLATFORM_COUNT);
 
         addBasePlatformsAcrossZones(platforms);
 
@@ -85,13 +88,13 @@ public class PlatformGeneratorService {
 
     private PlatformDto generateCandidateInRandomZone() {
         int zoneWidth = GameConstants.CANVAS_WIDTH / ZONE_COUNT;
-        int zone = random.nextInt(ZONE_COUNT);
+        int zone = randomService.betweenInclusive(0, ZONE_COUNT - 1);
 
         return generateCandidateInZone(zone, zoneWidth);
     }
 
     private PlatformDto generateCandidateInZone(int zone, int zoneWidth) {
-        int width = randomBetween(MIN_PLATFORM_WIDTH, MAX_PLATFORM_WIDTH);
+        int width = randomService.betweenInclusive(MIN_PLATFORM_WIDTH, MAX_PLATFORM_WIDTH);
 
         int zoneStartX = zone * zoneWidth;
         int zoneEndX = Math.min(GameConstants.CANVAS_WIDTH, zoneStartX + zoneWidth);
@@ -103,8 +106,8 @@ public class PlatformGeneratorService {
             maxX = minX;
         }
 
-        int x = clamp(randomBetween(minX, maxX), 0, GameConstants.CANVAS_WIDTH - width);
-        int y = randomBetween(MIN_PLATFORM_Y, MAX_PLATFORM_Y);
+        int x = clamp(randomService.betweenInclusive(minX, maxX), 0, GameConstants.CANVAS_WIDTH - width);
+        int y = randomService.betweenInclusive(MIN_PLATFORM_Y, MAX_PLATFORM_Y);
 
         return new PlatformDto(x, y, width, GameConstants.PLATFORM_HEIGHT);
     }
@@ -141,14 +144,6 @@ public class PlatformGeneratorService {
     private boolean isReachableOrDroppable(PlatformDto candidate, List<PlatformDto> existingPlatforms) {
         return existingPlatforms.stream()
                 .anyMatch(existing -> platformReachabilityService.canMoveFromTo(existing, candidate));
-    }
-
-    private int randomBetween(int min, int max) {
-        if (max < min) {
-            return min;
-        }
-
-        return random.nextInt(max - min + 1) + min;
     }
 
     private int clamp(int value, int min, int max) {

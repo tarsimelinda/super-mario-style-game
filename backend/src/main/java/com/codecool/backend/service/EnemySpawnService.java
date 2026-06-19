@@ -8,7 +8,6 @@ import com.codecool.backend.repository.EnemyRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Random;
 
 @Service
 public class EnemySpawnService {
@@ -25,10 +24,14 @@ public class EnemySpawnService {
     private static final int PLATFORM_COUNT_PER_ENEMY = 6;
 
     private final EnemyRepository enemyRepository;
-    private final Random random = new Random();
+    private final RandomService randomService;
 
-    public EnemySpawnService(EnemyRepository enemyRepository) {
+    public EnemySpawnService(
+            EnemyRepository enemyRepository,
+            RandomService randomService
+    ) {
         this.enemyRepository = enemyRepository;
+        this.randomService = randomService;
     }
 
     public List<EnemySpawnDto> generateEnemies(List<PlatformDto> platforms) {
@@ -42,7 +45,7 @@ public class EnemySpawnService {
                 .skip(FIRST_RANDOM_PLATFORM_INDEX)
                 .filter(platform -> platform.width() >= MIN_PLATFORM_WIDTH_FOR_ENEMY)
                 .filter(this::isSafeEnemyPlatform)
-                .filter(platform -> random.nextInt(100) < ENEMY_SPAWN_CHANCE_PERCENT)
+                .filter(platform -> randomService.percent() < ENEMY_SPAWN_CHANCE_PERCENT)
                 .limit(calculateEnemyCount(platforms))
                 .map(platform -> createEnemySpawn(platform, enemyTypes))
                 .toList();
@@ -52,7 +55,7 @@ public class EnemySpawnService {
             PlatformDto platform,
             List<Enemy> enemyTypes
     ) {
-        Enemy enemyType = enemyTypes.get(random.nextInt(enemyTypes.size()));
+        Enemy enemyType = randomService.pickOne(enemyTypes);
 
         return new EnemySpawnDto(
                 platform.x() + platform.width() / 2 - GameConstants.ENEMY_WIDTH / 2,
