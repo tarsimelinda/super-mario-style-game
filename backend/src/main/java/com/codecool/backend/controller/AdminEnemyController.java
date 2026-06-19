@@ -2,7 +2,7 @@ package com.codecool.backend.controller;
 
 import com.codecool.backend.config.ApiRoutes;
 import com.codecool.backend.dto.EnemyCreateRequest;
-import com.codecool.backend.model.Enemy;
+import com.codecool.backend.dto.EnemyResponse;
 import com.codecool.backend.service.EnemyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class AdminEnemyController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Enemy create(@Valid @RequestBody EnemyCreateRequest body) {
+    public EnemyResponse create(@Valid @RequestBody EnemyCreateRequest body) {
         return service.create(body);
     }
 }

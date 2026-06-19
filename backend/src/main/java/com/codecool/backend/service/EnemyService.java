@@ -1,6 +1,7 @@
 package com.codecool.backend.service;
 
 import com.codecool.backend.dto.EnemyCreateRequest;
+import com.codecool.backend.dto.EnemyResponse;
 import com.codecool.backend.model.Enemy;
 import com.codecool.backend.repository.EnemyRepository;
 import org.springframework.stereotype.Service;
@@ -14,14 +15,25 @@ public class EnemyService {
         this.repository = repository;
     }
 
-    public Enemy create(EnemyCreateRequest body) {
-        Enemy e = new Enemy();
-        e.setDamage(body.damage());
-        e.setSpeed(body.speed());
-        e.setHp(body.hp());
-        e.setColor(body.color());
-        e.setCanJump(Boolean.TRUE.equals(body.canJump()));
+    public EnemyResponse create(EnemyCreateRequest body) {
+        Enemy enemy = new Enemy();
+        enemy.setDamage(body.damage());
+        enemy.setSpeed(body.speed());
+        enemy.setHp(body.hp());
+        enemy.setColor(body.color().trim());
+        enemy.setCanJump(Boolean.TRUE.equals(body.canJump()));
 
-        return repository.save(e);
+        return toResponse(repository.save(enemy));
+    }
+
+    private EnemyResponse toResponse(Enemy enemy) {
+        return new EnemyResponse(
+                enemy.getId(),
+                enemy.getDamage(),
+                enemy.getSpeed(),
+                enemy.getHp(),
+                enemy.getColor(),
+                enemy.isCanJump()
+        );
     }
 }
