@@ -1,5 +1,6 @@
 package com.codecool.backend.service;
 
+import com.codecool.backend.config.GameBalanceProperties;
 import com.codecool.backend.config.GameConstants;
 import com.codecool.backend.dto.CoinDto;
 import com.codecool.backend.dto.PlatformDto;
@@ -12,9 +13,6 @@ import java.util.List;
 @Service
 public class CoinGeneratorService {
 
-    private static final int MIN_COIN_COUNT = 10;
-    private static final int MAX_COIN_COUNT = 25;
-
     private static final int MIN_HEIGHT_ABOVE_PLATFORM = 35;
     private static final int MAX_HEIGHT_ABOVE_PLATFORM = 80;
 
@@ -24,19 +22,25 @@ public class CoinGeneratorService {
 
     private final RandomService randomService;
     private final CoinValidator coinValidator;
+    private final GameBalanceProperties gameBalanceProperties;
 
     public CoinGeneratorService(
             CoinValidator coinValidator,
-            RandomService randomService
+            RandomService randomService,
+            GameBalanceProperties gameBalanceProperties
     ) {
         this.coinValidator = coinValidator;
         this.randomService = randomService;
+        this.gameBalanceProperties = gameBalanceProperties;
     }
 
     public List<CoinDto> generateCoins(List<PlatformDto> platforms) {
         List<CoinDto> coins = new ArrayList<>();
 
-        int targetCoinCount = randomService.betweenInclusive(MIN_COIN_COUNT, MAX_COIN_COUNT);
+        int targetCoinCount = randomService.betweenInclusive(
+                gameBalanceProperties.coin().minCount(),
+                gameBalanceProperties.coin().maxCount()
+        );
 
         List<PlatformDto> shuffledPlatforms = new ArrayList<>(platforms);
         java.util.Collections.shuffle(shuffledPlatforms);

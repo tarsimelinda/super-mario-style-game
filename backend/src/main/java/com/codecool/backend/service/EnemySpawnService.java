@@ -1,5 +1,6 @@
 package com.codecool.backend.service;
 
+import com.codecool.backend.config.GameBalanceProperties;
 import com.codecool.backend.config.GameConstants;
 import com.codecool.backend.dto.EnemySpawnDto;
 import com.codecool.backend.dto.PlatformDto;
@@ -16,22 +17,22 @@ public class EnemySpawnService {
     private static final int MAX_ENEMY_Y = 420;
 
     private static final int MIN_PLATFORM_WIDTH_FOR_ENEMY = 90;
-    private static final int ENEMY_SPAWN_CHANCE_PERCENT = 35;
 
     private static final int FIRST_RANDOM_PLATFORM_INDEX = 1;
-    private static final int MIN_ENEMY_COUNT = 1;
-    private static final int MAX_ENEMY_COUNT = 5;
     private static final int PLATFORM_COUNT_PER_ENEMY = 6;
 
     private final EnemyRepository enemyRepository;
     private final RandomService randomService;
+    private final GameBalanceProperties gameBalanceProperties;
 
     public EnemySpawnService(
             EnemyRepository enemyRepository,
-            RandomService randomService
+            RandomService randomService,
+            GameBalanceProperties gameBalanceProperties
     ) {
         this.enemyRepository = enemyRepository;
         this.randomService = randomService;
+        this.gameBalanceProperties = gameBalanceProperties;
     }
 
     public List<EnemySpawnDto> generateEnemies(List<PlatformDto> platforms) {
@@ -45,7 +46,7 @@ public class EnemySpawnService {
                 .skip(FIRST_RANDOM_PLATFORM_INDEX)
                 .filter(platform -> platform.width() >= MIN_PLATFORM_WIDTH_FOR_ENEMY)
                 .filter(this::isSafeEnemyPlatform)
-                .filter(platform -> randomService.percent() < ENEMY_SPAWN_CHANCE_PERCENT)
+                .filter(platform -> randomService.percent() < gameBalanceProperties.enemy().spawnChancePercent())
                 .limit(calculateEnemyCount(platforms))
                 .map(platform -> createEnemySpawn(platform, enemyTypes))
                 .toList();
@@ -82,8 +83,11 @@ public class EnemySpawnService {
 
     private int calculateEnemyCount(List<PlatformDto> platforms) {
         return Math.max(
-                MIN_ENEMY_COUNT,
-                Math.min(MAX_ENEMY_COUNT, platforms.size() / PLATFORM_COUNT_PER_ENEMY)
+                gameBalanceProperties.enemy().minCount(),
+                Math.min(
+                        gameBalanceProperties.enemy().maxCount(),
+                        platforms.size() / PLATFORM_COUNT_PER_ENEMY
+                )
         );
     }
 }

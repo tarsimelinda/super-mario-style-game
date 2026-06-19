@@ -1,5 +1,6 @@
 package com.codecool.backend.service;
 
+import com.codecool.backend.config.GameBalanceProperties;
 import com.codecool.backend.config.GameConstants;
 import com.codecool.backend.dto.PlatformDto;
 import org.springframework.stereotype.Service;
@@ -10,9 +11,6 @@ import java.util.List;
 
 @Service
 public class PlatformGeneratorService {
-
-    private static final int MIN_PLATFORM_COUNT = 10;
-    private static final int MAX_PLATFORM_COUNT = 24;
 
     private static final int MIN_PLATFORM_WIDTH = 70;
     private static final int MAX_PLATFORM_WIDTH = 240;
@@ -27,15 +25,18 @@ public class PlatformGeneratorService {
     private static final int MAX_ATTEMPTS = 4000;
 
     private final RandomService randomService;
+    private final GameBalanceProperties gameBalanceProperties;
 
     private final PlatformReachabilityService platformReachabilityService;
 
     public PlatformGeneratorService(
             PlatformReachabilityService platformReachabilityService,
-            RandomService randomService
+            RandomService randomService,
+            GameBalanceProperties gameBalanceProperties
     ) {
         this.platformReachabilityService = platformReachabilityService;
         this.randomService = randomService;
+        this.gameBalanceProperties = gameBalanceProperties;
     }
 
     public List<PlatformDto> generatePlatforms() {
@@ -44,7 +45,10 @@ public class PlatformGeneratorService {
         PlatformDto startPlatform = new PlatformDto(80, 460, 220, GameConstants.PLATFORM_HEIGHT);
         platforms.add(startPlatform);
 
-        int targetPlatformCount = randomService.betweenInclusive(MIN_PLATFORM_COUNT, MAX_PLATFORM_COUNT);
+        int targetPlatformCount = randomService.betweenInclusive(
+                gameBalanceProperties.platform().minCount(),
+                gameBalanceProperties.platform().maxCount()
+        );
 
         addBasePlatformsAcrossZones(platforms);
 
