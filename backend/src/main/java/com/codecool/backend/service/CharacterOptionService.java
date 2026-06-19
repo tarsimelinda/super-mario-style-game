@@ -1,6 +1,7 @@
 package com.codecool.backend.service;
 
 import com.codecool.backend.dto.CharacterCreateRequest;
+import com.codecool.backend.dto.CharacterOptionResponse;
 import com.codecool.backend.model.CharacterOption;
 import com.codecool.backend.repository.CharacterOptionRepository;
 import org.springframework.stereotype.Service;
@@ -16,11 +17,13 @@ public class CharacterOptionService {
         this.repository = repository;
     }
 
-    public List<CharacterOption> getAll() {
-        return repository.findAll();
+    public List<CharacterOptionResponse> getAll() {
+        return repository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public CharacterOption create(CharacterCreateRequest body) {
+    public CharacterOptionResponse create(CharacterCreateRequest body) {
         String key = normalizeKey(body.key());
 
         if (repository.existsByKey(key)) {
@@ -32,7 +35,7 @@ public class CharacterOptionService {
         character.setDisplayName(body.displayName().trim());
         character.setColor(body.color().trim());
 
-        return repository.save(character);
+        return toResponse(repository.save(character));
     }
 
     public CharacterOption getByKey(String key) {
@@ -44,6 +47,15 @@ public class CharacterOptionService {
 
         return repository.findByKey(normalizedKey)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid character: " + key));
+    }
+
+    private CharacterOptionResponse toResponse(CharacterOption character) {
+        return new CharacterOptionResponse(
+                character.getId(),
+                character.getKey(),
+                character.getDisplayName(),
+                character.getColor()
+        );
     }
 
     private String normalizeKey(String key) {

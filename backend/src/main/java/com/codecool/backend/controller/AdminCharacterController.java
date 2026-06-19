@@ -2,7 +2,7 @@ package com.codecool.backend.controller;
 
 import com.codecool.backend.config.ApiRoutes;
 import com.codecool.backend.dto.CharacterCreateRequest;
-import com.codecool.backend.model.CharacterOption;
+import com.codecool.backend.dto.CharacterOptionResponse;
 import com.codecool.backend.service.CharacterOptionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class AdminCharacterController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CharacterOption create(@Valid @RequestBody CharacterCreateRequest body) {
+    public CharacterOptionResponse create(@Valid @RequestBody CharacterCreateRequest body) {
         return service.create(body);
     }
 }

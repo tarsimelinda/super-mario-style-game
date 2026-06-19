@@ -1,7 +1,7 @@
 package com.codecool.backend.controller;
 
 import com.codecool.backend.config.ApiRoutes;
-import com.codecool.backend.model.CharacterOption;
+import com.codecool.backend.dto.CharacterOptionResponse;
 import com.codecool.backend.service.CharacterOptionService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +18,7 @@ public class CharacterOptionController {
     }
 
     @GetMapping
-    public List<CharacterOption> getAll() {
+    public List<CharacterOptionResponse> getAll() {
         return service.getAll();
     }
 }
