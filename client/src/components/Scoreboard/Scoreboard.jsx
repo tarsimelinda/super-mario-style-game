@@ -1,4 +1,5 @@
 import styles from "./Scoreboard.module.css";
+import { getPlayerName, getPlayerColor } from "../../utils/players";
 
 export default function Scoreboard({
     players = [],
@@ -10,22 +11,6 @@ export default function Scoreboard({
     levelNumber = 1,
 }) {
     const totalCollected = coinsCollected.reduce((acc, n) => acc + (n ?? 0), 0);
-
-    const getPlayerName = (index) => {
-        if (Array.isArray(players) && players[index]?.name) {
-            return players[index].name;
-        }
-
-        return `Player ${index + 1}`;
-    };
-
-    const getPlayerColor = (index) => {
-        if (Array.isArray(players) && players[index]?.characterColor) {
-            return players[index].characterColor;
-        }
-
-        return index === 0 ? "red" : "cyan";
-    };
 
     return (
         <div className={styles.container} aria-live="polite" aria-label="Scoreboard">
@@ -40,10 +25,10 @@ export default function Scoreboard({
                     <div key={i} className={styles.playerRow}>
                         <span
                             className={styles.dot}
-                            style={{ backgroundColor: getPlayerColor(i) }}
+                            style={{ backgroundColor: getPlayerColor(players, i) }}
                             aria-hidden
                         />
-                        {getPlayerName(i)}: {coinsCollected[i] ?? 0} coins
+                        {getPlayerName(players, i)}: {coinsCollected[i] ?? 0} coins
                     </div>
                 ))}
             </div>
