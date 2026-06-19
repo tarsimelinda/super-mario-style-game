@@ -2,7 +2,7 @@ package com.codecool.backend.controller;
 
 import com.codecool.backend.config.ApiRoutes;
 import com.codecool.backend.dto.PlayerPatchRequest;
-import com.codecool.backend.model.Player;
+import com.codecool.backend.dto.PlayerResponse;
 import com.codecool.backend.service.PlayerService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,10 @@ public class PlayersController {
     }
 
     @PatchMapping(ApiRoutes.BY_ID)
-    public Player patch(@PathVariable String id, @Valid @RequestBody PlayerPatchRequest body) {
+    public PlayerResponse patch(
+            @PathVariable String id,
+            @Valid @RequestBody PlayerPatchRequest body
+    ) {
         return service.patchById(id, body);
     }
 }
