@@ -2,7 +2,7 @@ package com.codecool.backend.controller;
 
 import com.codecool.backend.config.ApiRoutes;
 import com.codecool.backend.dto.UserCheckpointPatchRequest;
-import com.codecool.backend.model.User;
+import com.codecool.backend.dto.UserResponse;
 import com.codecool.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,7 @@ public class UsersController {
     }
 
     @PatchMapping(ApiRoutes.USER_CHECKPOINT)
-    public User updateCheckpoint(
+    public UserResponse updateCheckpoint(
             @PathVariable String id,
             @Valid @RequestBody UserCheckpointPatchRequest body
     ) {

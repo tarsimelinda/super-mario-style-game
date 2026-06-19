@@ -1,5 +1,6 @@
 package com.codecool.backend.service;
 
+import com.codecool.backend.dto.UserResponse;
 import com.codecool.backend.exception.NotFoundException;
 import com.codecool.backend.model.User;
 import com.codecool.backend.repository.UserRepository;
@@ -14,12 +15,21 @@ public class UserService {
         this.repository = repository;
     }
 
-    public User updateCheckpoint(String id, int checkpoint) {
+    public UserResponse updateCheckpoint(String id, int checkpoint) {
         User user = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found: " + id));
 
         user.setCheckpoint(checkpoint);
 
-        return repository.save(user);
+        return toResponse(repository.save(user));
+    }
+
+    private UserResponse toResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getName(),
+                user.getCheckpoint(),
+                user.getCharacter()
+        );
     }
 }
