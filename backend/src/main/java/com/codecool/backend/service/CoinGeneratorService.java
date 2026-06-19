@@ -1,5 +1,6 @@
 package com.codecool.backend.service;
 
+import com.codecool.backend.config.GameConstants;
 import com.codecool.backend.dto.CoinDto;
 import com.codecool.backend.dto.PlatformDto;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,6 @@ import java.util.Random;
 
 @Service
 public class CoinGeneratorService {
-
-    private static final int COIN_WIDTH = 20;
-    private static final int COIN_HEIGHT = 20;
 
     private static final int MIN_COIN_COUNT = 10;
     private static final int MAX_COIN_COUNT = 25;
@@ -86,12 +84,12 @@ public class CoinGeneratorService {
             int coinsOnThisPlatform
     ) {
         int usableLeft = platform.left() + PLATFORM_SIDE_MARGIN;
-        int usableRight = platform.right() - PLATFORM_SIDE_MARGIN - COIN_WIDTH;
+        int usableRight = platform.right() - PLATFORM_SIDE_MARGIN - GameConstants.COIN_WIDTH;
 
         int x;
 
         if (coinsOnThisPlatform <= 1) {
-            x = platform.centerX() - COIN_WIDTH / 2;
+            x = platform.centerX() - GameConstants.COIN_WIDTH / 2;
         } else {
             int usableWidth = usableRight - usableLeft;
             int spacing = usableWidth / Math.max(1, coinsOnThisPlatform - 1);
@@ -106,9 +104,9 @@ public class CoinGeneratorService {
                 MAX_HEIGHT_ABOVE_PLATFORM
         );
 
-        int y = platform.top() - distanceAbovePlatform - COIN_HEIGHT;
+        int y = platform.top() - distanceAbovePlatform - GameConstants.COIN_HEIGHT;
 
-        return new CoinDto(x, y, COIN_WIDTH, COIN_HEIGHT);
+        return new CoinDto(x, y, GameConstants.COIN_WIDTH, GameConstants.COIN_HEIGHT);
     }
 
     private boolean overlapsAnyExistingCoin(CoinDto candidate, List<CoinDto> existingCoins) {

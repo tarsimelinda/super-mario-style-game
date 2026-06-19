@@ -1,5 +1,6 @@
 package com.codecool.backend.service;
 
+import com.codecool.backend.config.GameConstants;
 import com.codecool.backend.dto.EnemySpawnDto;
 import com.codecool.backend.dto.PlatformDto;
 import com.codecool.backend.model.Enemy;
@@ -11,9 +12,6 @@ import java.util.Random;
 
 @Service
 public class EnemySpawnService {
-
-    private static final int ENEMY_WIDTH = 40;
-    private static final int ENEMY_HEIGHT = 40;
 
     private static final int MIN_ENEMY_Y = 80;
     private static final int MAX_ENEMY_Y = 420;
@@ -57,10 +55,10 @@ public class EnemySpawnService {
         Enemy enemyType = enemyTypes.get(random.nextInt(enemyTypes.size()));
 
         return new EnemySpawnDto(
-                platform.x() + platform.width() / 2 - ENEMY_WIDTH / 2,
-                platform.y() - ENEMY_HEIGHT,
-                ENEMY_WIDTH,
-                ENEMY_HEIGHT,
+                platform.x() + platform.width() / 2 - GameConstants.ENEMY_WIDTH / 2,
+                platform.y() - GameConstants.ENEMY_HEIGHT,
+                GameConstants.ENEMY_WIDTH,
+                GameConstants.ENEMY_HEIGHT,
                 enemyType.getSpeed(),
                 enemyType.getDamage(),
                 enemyType.getHp(),
@@ -74,7 +72,7 @@ public class EnemySpawnService {
     }
 
     private boolean isSafeEnemyPlatform(PlatformDto platform) {
-        int enemyY = platform.y() - ENEMY_HEIGHT;
+        int enemyY = platform.y() - GameConstants.ENEMY_HEIGHT;
 
         return enemyY >= MIN_ENEMY_Y && enemyY <= MAX_ENEMY_Y;
     }

@@ -1,5 +1,6 @@
 package com.codecool.backend.service;
 
+import com.codecool.backend.config.GameConstants;
 import com.codecool.backend.dto.CoinDto;
 import com.codecool.backend.dto.EnemySpawnDto;
 import com.codecool.backend.dto.LevelDto;
@@ -53,7 +54,7 @@ public class LevelService {
 
             return new LevelDto(
                     LevelDefaultsService.RANDOM_LEVEL_PLAYER_START,
-                    LevelDefaultsService.DEFAULT_LIVES,
+                    GameConstants.DEFAULT_LIVES,
                     platforms,
                     enemies,
                     coins
