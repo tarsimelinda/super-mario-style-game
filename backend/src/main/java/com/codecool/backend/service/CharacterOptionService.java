@@ -17,17 +17,11 @@ public class CharacterOptionService {
     }
 
     public List<CharacterOption> getAll() {
-        List<CharacterOption> characters = repository.findAll();
-
-        if (!characters.isEmpty()) {
-            return characters;
-        }
-
-        return getFallbackCharacters();
+        return repository.findAll();
     }
 
     public CharacterOption create(CharacterCreateRequest body) {
-        String key = body.key().trim().toLowerCase();
+        String key = normalizeKey(body.key());
 
         if (repository.existsByKey(key)) {
             throw new IllegalArgumentException("Character already exists: " + key);
@@ -41,45 +35,18 @@ public class CharacterOptionService {
         return repository.save(character);
     }
 
-    public boolean existsByKey(String key) {
-        if (key == null || key.isBlank()) {
-            return false;
-        }
-
-        String normalizedKey = key.trim().toLowerCase();
-
-        if (repository.existsByKey(normalizedKey)) {
-            return true;
-        }
-
-        return getFallbackCharacters().stream()
-                .anyMatch(character -> character.getKey().equals(normalizedKey));
-    }
-
-    private List<CharacterOption> getFallbackCharacters() {
-        return List.of(
-                new CharacterOption(null, "lilly", "Lilly", "pink"),
-                new CharacterOption(null, "ponyo", "Ponyo", "orange"),
-                new CharacterOption(null, "balu", "Balu", "blue"),
-                new CharacterOption(null, "momo", "Momo", "purple")
-        );
-    }
-
     public CharacterOption getByKey(String key) {
         if (key == null || key.isBlank()) {
             throw new IllegalArgumentException("Character is required");
         }
 
-        String normalizedKey = key.trim().toLowerCase();
+        String normalizedKey = normalizeKey(key);
 
         return repository.findByKey(normalizedKey)
-                .orElseGet(() -> getFallbackCharacterByKey(normalizedKey, key));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid character: " + key));
     }
 
-    private CharacterOption getFallbackCharacterByKey(String normalizedKey, String originalKey) {
-        return getFallbackCharacters().stream()
-                .filter(character -> character.getKey().equals(normalizedKey))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid character: " + originalKey));
+    private String normalizeKey(String key) {
+        return key.trim().toLowerCase();
     }
 }
