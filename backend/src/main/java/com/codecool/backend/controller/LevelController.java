@@ -1,5 +1,6 @@
 package com.codecool.backend.controller;
 
+import com.codecool.backend.config.ApiRoutes;
 import com.codecool.backend.dto.LevelDto;
 import com.codecool.backend.service.LevelService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/levels")
+@RequestMapping(ApiRoutes.LEVELS)
 public class LevelController {
 
     private final LevelService levelService;
@@ -16,7 +17,7 @@ public class LevelController {
         this.levelService = levelService;
     }
 
-    @GetMapping("/random")
+    @GetMapping(ApiRoutes.RANDOM)
     public LevelDto getRandomLevel() {
         return levelService.getRandomLevel();
     }

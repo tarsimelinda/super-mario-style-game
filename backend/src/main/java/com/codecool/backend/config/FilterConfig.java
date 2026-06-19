@@ -13,7 +13,7 @@ public class FilterConfig {
     public FilterRegistrationBean<ApiKeyFilter> apiKeyFilterRegistration(ApiKeyFilter filter) {
         FilterRegistrationBean<ApiKeyFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(filter);
-        bean.addUrlPatterns("/api/*");
+        bean.addUrlPatterns(ApiRoutes.API_PATTERN);
         bean.setOrder(1);
         return bean;
     }
@@ -23,10 +23,10 @@ public class FilterConfig {
         FilterRegistrationBean<RateLimitFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(filter);
         bean.addUrlPatterns(
-                "/api/users",
-                "/api/players",
-                "/api/characters",
-                "/api/enemies"
+                ApiRoutes.REGISTRATIONS,
+                ApiRoutes.PLAYERS,
+                ApiRoutes.ADMIN_CHARACTERS,
+                ApiRoutes.ADMIN_ENEMIES
         );
         bean.setOrder(2);
         return bean;

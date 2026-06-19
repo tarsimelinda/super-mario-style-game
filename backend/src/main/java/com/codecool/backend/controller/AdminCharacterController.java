@@ -1,5 +1,6 @@
 package com.codecool.backend.controller;
 
+import com.codecool.backend.config.ApiRoutes;
 import com.codecool.backend.dto.CharacterCreateRequest;
 import com.codecool.backend.model.CharacterOption;
 import com.codecool.backend.service.CharacterOptionService;
@@ -8,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin/characters")
+@RequestMapping(ApiRoutes.ADMIN_CHARACTERS)
 public class AdminCharacterController {
 
     private final CharacterOptionService service;

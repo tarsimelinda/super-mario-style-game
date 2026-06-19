@@ -1,5 +1,6 @@
 package com.codecool.backend.controller;
 
+import com.codecool.backend.config.ApiRoutes;
 import com.codecool.backend.dto.RegistrationCreateRequest;
 import com.codecool.backend.dto.RegistrationResponse;
 import com.codecool.backend.service.RegistrationService;
@@ -8,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/registrations")
+@RequestMapping(ApiRoutes.REGISTRATIONS)
 public class RegistrationController {
 
     private final RegistrationService service;

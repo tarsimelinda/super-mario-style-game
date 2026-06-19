@@ -1,16 +1,14 @@
 package com.codecool.backend.controller;
 
-import com.codecool.backend.dto.CharacterCreateRequest;
+import com.codecool.backend.config.ApiRoutes;
 import com.codecool.backend.model.CharacterOption;
 import com.codecool.backend.service.CharacterOptionService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/characters")
+@RequestMapping(ApiRoutes.CHARACTERS)
 public class CharacterOptionController {
 
     private final CharacterOptionService service;
