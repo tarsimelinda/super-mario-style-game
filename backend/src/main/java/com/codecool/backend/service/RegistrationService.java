@@ -9,6 +9,7 @@ import com.codecool.backend.model.User;
 import com.codecool.backend.repository.PlayerRepository;
 import com.codecool.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RegistrationService {
@@ -31,6 +32,7 @@ public class RegistrationService {
         this.characterOptionService = characterOptionService;
     }
 
+    @Transactional
     public RegistrationResponse register(RegistrationCreateRequest body) {
         String name = normalizeName(body.name());
         String characterKey = normalizeCharacterKey(body.character());
@@ -38,14 +40,9 @@ public class RegistrationService {
         CharacterOption character = characterOptionService.getByKey(characterKey);
 
         User savedUser = createUser(name, characterKey);
+        Player savedPlayer = createPlayer(savedUser.getId());
 
-        try {
-            Player savedPlayer = createPlayer(savedUser.getId());
-            return toResponse(savedUser, savedPlayer, character);
-        } catch (RuntimeException ex) {
-            userRepository.deleteById(savedUser.getId());
-            throw ex;
-        }
+        return toResponse(savedUser, savedPlayer, character);
     }
 
     private String normalizeName(String name) {

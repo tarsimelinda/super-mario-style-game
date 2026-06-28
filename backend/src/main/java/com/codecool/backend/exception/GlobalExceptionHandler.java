@@ -4,9 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @ControllerAdvice
@@ -34,6 +37,34 @@ public class GlobalExceptionHandler {
                 .body(new ApiError("VALIDATION_ERROR", errors));
     }
 
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ApiError> handleBindException(BindException ex) {
+        var errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError("VALIDATION_ERROR", errors));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiError> handleMissingRequestParameter(MissingServletRequestParameterException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError(
+                        "BAD_REQUEST",
+                        "Missing required request parameter: " + ex.getParameterName()
+                ));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiError(
+                        "BAD_REQUEST",
+                        "Invalid value for parameter: " + ex.getName()
+                ));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -47,5 +78,6 @@ public class GlobalExceptionHandler {
                 .body(new ApiError("INTERNAL_ERROR", "Internal server error"));
     }
 
-    public record ApiError(String code, Object details) {}
+    public record ApiError(String code, Object details) {
+    }
 }

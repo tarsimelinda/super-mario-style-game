@@ -15,7 +15,7 @@ public class UserService {
         this.repository = repository;
     }
 
-    public UserResponse updateCheckpoint(String id, int checkpoint) {
+    public UserResponse updateCheckpoint(String id, Integer checkpoint) {
         User user = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found: " + id));
 

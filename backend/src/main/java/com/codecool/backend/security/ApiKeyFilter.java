@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 public class ApiKeyFilter implements Filter {
@@ -18,6 +19,10 @@ public class ApiKeyFilter implements Filter {
     private final String expectedApiKey;
 
     public ApiKeyFilter(@Value("${app.api-key}") String expectedApiKey) {
+        if (expectedApiKey == null || expectedApiKey.isBlank()) {
+            throw new IllegalStateException("Missing required configuration: app.api-key");
+        }
+
         this.expectedApiKey = expectedApiKey;
     }
 
@@ -35,7 +40,7 @@ public class ApiKeyFilter implements Filter {
 
         String actualApiKey = request.getHeader(API_KEY_HEADER);
 
-        if (expectedApiKey.equals(actualApiKey)) {
+        if (Objects.equals(expectedApiKey, actualApiKey)) {
             chain.doFilter(req, res);
             return;
         }
@@ -43,10 +48,10 @@ public class ApiKeyFilter implements Filter {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write("""
-        {
-          "code": "UNAUTHORIZED",
-          "details": "Missing or invalid API key."
-        }
-        """);
+                {
+                  "code": "UNAUTHORIZED",
+                  "details": "Missing or invalid API key."
+                }
+                """);
     }
 }
