@@ -16,6 +16,10 @@ public class UserService {
     }
 
     public UserResponse updateCheckpoint(String id, Integer checkpoint) {
+        if (checkpoint == null || checkpoint < 1) {
+            throw new IllegalArgumentException("Checkpoint must be at least 1");
+        }
+
         User user = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found: " + id));
 
