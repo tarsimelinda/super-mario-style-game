@@ -28,8 +28,20 @@ class CharacterOptionServiceTest {
 
     @Test
     void getAllShouldReturnAllCharacterOptionsAsResponses() {
-        CharacterOption chicken = createCharacterOption("1", "chicken", "Chicken", "yellow");
-        CharacterOption duck = createCharacterOption("2", "duck", "Duck", "white");
+        CharacterOption chicken = createCharacterOption(
+                "1",
+                "chicken",
+                "Chicken",
+                "yellow",
+                "/characters/chicken.png"
+        );
+        CharacterOption duck = createCharacterOption(
+                "2",
+                "duck",
+                "Duck",
+                "white",
+                "/characters/duck.png"
+        );
 
         when(repository.findAll()).thenReturn(List.of(chicken, duck));
 
@@ -41,11 +53,13 @@ class CharacterOptionServiceTest {
         assertEquals("chicken", result.get(0).key());
         assertEquals("Chicken", result.get(0).displayName());
         assertEquals("yellow", result.get(0).color());
+        assertEquals("/characters/chicken.png", result.get(0).imageUrl());
 
         assertEquals("2", result.get(1).id());
         assertEquals("duck", result.get(1).key());
         assertEquals("Duck", result.get(1).displayName());
         assertEquals("white", result.get(1).color());
+        assertEquals("/characters/duck.png", result.get(1).imageUrl());
 
         verify(repository).findAll();
     }
@@ -55,10 +69,17 @@ class CharacterOptionServiceTest {
         CharacterCreateRequest request = new CharacterCreateRequest(
                 "  CHICKEN  ",
                 "  Chicken  ",
-                "  yellow  "
+                "  yellow  ",
+                "  /characters/chicken.png  "
         );
 
-        CharacterOption savedCharacter = createCharacterOption("1", "chicken", "Chicken", "yellow");
+        CharacterOption savedCharacter = createCharacterOption(
+                "1",
+                "chicken",
+                "Chicken",
+                "yellow",
+                "/characters/chicken.png"
+        );
 
         when(repository.existsByKey("chicken")).thenReturn(false);
         when(repository.save(any(CharacterOption.class))).thenReturn(savedCharacter);
@@ -69,6 +90,7 @@ class CharacterOptionServiceTest {
         assertEquals("chicken", result.key());
         assertEquals("Chicken", result.displayName());
         assertEquals("yellow", result.color());
+        assertEquals("/characters/chicken.png", result.imageUrl());
 
         ArgumentCaptor<CharacterOption> captor = ArgumentCaptor.forClass(CharacterOption.class);
         verify(repository).save(captor.capture());
@@ -78,6 +100,7 @@ class CharacterOptionServiceTest {
         assertEquals("chicken", characterToSave.getKey());
         assertEquals("Chicken", characterToSave.getDisplayName());
         assertEquals("yellow", characterToSave.getColor());
+        assertEquals("/characters/chicken.png", characterToSave.getImageUrl());
 
         verify(repository).existsByKey("chicken");
     }
@@ -87,7 +110,8 @@ class CharacterOptionServiceTest {
         CharacterCreateRequest request = new CharacterCreateRequest(
                 "  CHICKEN  ",
                 "Chicken",
-                "yellow"
+                "yellow",
+                "/characters/chicken.png"
         );
 
         when(repository.existsByKey("chicken")).thenReturn(true);
@@ -105,7 +129,13 @@ class CharacterOptionServiceTest {
 
     @Test
     void getByKeyShouldReturnCharacterByNormalizedKey() {
-        CharacterOption character = createCharacterOption("1", "chicken", "Chicken", "yellow");
+        CharacterOption character = createCharacterOption(
+                "1",
+                "chicken",
+                "Chicken",
+                "yellow",
+                "/characters/chicken.png"
+        );
 
         when(repository.findByKey("chicken")).thenReturn(Optional.of(character));
 
@@ -158,13 +188,15 @@ class CharacterOptionServiceTest {
             String id,
             String key,
             String displayName,
-            String color
+            String color,
+            String imageUrl
     ) {
         CharacterOption character = new CharacterOption();
         character.setId(id);
         character.setKey(key);
         character.setDisplayName(displayName);
         character.setColor(color);
+        character.setImageUrl(imageUrl);
         return character;
     }
 }
