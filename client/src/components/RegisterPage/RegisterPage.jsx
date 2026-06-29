@@ -62,8 +62,21 @@ export default function RegisterPage() {
         try {
             const registeredPlayers = await registerPlayers(playersData);
 
-            sessionStorage.setItem("playersData", JSON.stringify(registeredPlayers));
-            navigate("/game", { state: { playersData: registeredPlayers } });
+            const playersWithCharacterImages = registeredPlayers.map((player) => {
+                const fullCharacter = characters.find(
+                    (character) => character.key === player.character
+                );
+
+                return {
+                    ...player,
+                    characterImageUrl: fullCharacter?.imageUrl ?? null,
+                };
+            });
+
+            console.log("playersWithCharacterImages:", playersWithCharacterImages);
+
+            sessionStorage.setItem("playersData", JSON.stringify(playersWithCharacterImages));
+            navigate("/game", { state: { playersData: playersWithCharacterImages } });
         } catch (err) {
             console.error(err);
             setError("Failed to register players. Please try again.");

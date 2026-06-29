@@ -34,6 +34,7 @@ public class CharacterOptionService {
         character.setKey(key);
         character.setDisplayName(body.displayName().trim());
         character.setColor(body.color().trim());
+        character.setImageUrl(body.imageUrl().trim());
 
         return toResponse(repository.save(character));
     }
@@ -54,7 +55,8 @@ public class CharacterOptionService {
                 character.getId(),
                 character.getKey(),
                 character.getDisplayName(),
-                character.getColor()
+                character.getColor(),
+                character.getImageUrl()
         );
     }
 

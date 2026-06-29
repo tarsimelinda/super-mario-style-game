@@ -14,6 +14,7 @@ public record CharacterCreateRequest(
 
         @NotBlank(message = "Color is required")
         @Size(max = 50, message = "Color must be at most 50 characters")
-        String color
+        String color,
+        String imageUrl
 ) {
 }

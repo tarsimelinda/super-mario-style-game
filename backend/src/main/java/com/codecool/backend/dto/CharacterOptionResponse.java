@@ -4,6 +4,7 @@ public record CharacterOptionResponse(
         String id,
         String key,
         String displayName,
-        String color
+        String color,
+        String imageUrl
 ) {
 }

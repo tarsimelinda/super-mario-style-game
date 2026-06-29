@@ -15,4 +15,5 @@ public class CharacterOption {
     private String key;
     private String displayName;
     private String color;
+    private String imageUrl;
 }

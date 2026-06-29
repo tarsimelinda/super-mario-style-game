@@ -34,7 +34,9 @@ export default function PlayerCard({ index, data, onChange, characters = [] }) {
                 onChange={(e) => onChange(index, "character", e.target.value)}
                 required
             >
-                <option value="">Choose a character</option>
+                <option value="" disabled hidden>
+                    Choose a character
+                </option>
 
                 {characters.map((character) => (
                     <option key={character.key} value={character.key}>

@@ -73,7 +73,7 @@ const GameCanvas = ({ players, onExit }) => {
     const initGame = useCallback(() => {
         if (!level) return;
 
-        const createdPlayers = createPlayers(level, playerCount);
+        const createdPlayers = createPlayers(level, players.length, players);
 
         player1.current = createdPlayers.player1;
         player2.current = createdPlayers.player2;
