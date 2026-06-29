@@ -18,28 +18,46 @@ export function createPlatforms(level) {
     );
 }
 
-export function createPlayers(level, playerCount) {
+function getPlayerImageUrl(playerData) {
+    return (
+        playerData?.characterImageUrl ||
+        playerData?.character?.imageUrl ||
+        playerData?.imageUrl ||
+        null
+    );
+}
+
+export function createPlayers(level, playerCount, players = []) {
+    console.log("players passed to createPlayers:", players);
+
     const playerStart = level?.playerStart || { x: 50, y: 200 };
 
+    const player1Data = players[0];
+    const player2Data = players[1];
+
+    console.log("player1 imageUrl:", getPlayerImageUrl(player1Data));
+
     const player1 = new Player(
-        playerStart.x,
-        playerStart.y,
-        50,
-        50,
-        5,
-        GAME_CONSTANTS.groundY
-    );
+    playerStart.x,
+    playerStart.y,
+    50,
+    50,
+    5,
+    GAME_CONSTANTS.groundY,
+    getPlayerImageUrl(player1Data)
+);
 
     const player2 =
         playerCount > 1
             ? new Player(
-                  playerStart.x + 100,
-                  playerStart.y,
-                  50,
-                  50,
-                  5,
-                  GAME_CONSTANTS.groundY
-              )
+                playerStart.x + 100,
+                playerStart.y,
+                50,
+                50,
+                5,
+                GAME_CONSTANTS.groundY,
+                getPlayerImageUrl(player2Data)
+            )
             : null;
 
     return {

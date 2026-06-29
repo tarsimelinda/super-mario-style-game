@@ -1,16 +1,27 @@
 import Character from "./Character";
 
 class Player extends Character {
-
-    constructor(x, y, width, height, speed, groundY = 550) {
+    constructor(x, y, width, height, speed, groundY = 550, imageUrl = null) {
         super(x, y, width, height);
         this.velocityY = 0;
         this.speed = speed;
         this.groundY = groundY;
         this.canJump = this.y + this.height >= groundY;
+
+        this.image = null;
+
+        if (imageUrl) {
+            this.image = new Image();
+            this.image.src = imageUrl;
+        }
     }
 
     draw(ctx, color = "red") {
+        if (this.image?.complete) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            return;
+        }
+
         ctx.fillStyle = color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
