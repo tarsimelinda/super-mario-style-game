@@ -1,7 +1,7 @@
 const API_BASE = "/api";
 
 export async function apiFetch(path, options = {}) {
-    const token = import.meta.env.VITE_DEV_TOKEN;
+    const token = import.meta.env.VITE_API_KEY;
 
     const headers = {
         "Content-Type": "application/json",
