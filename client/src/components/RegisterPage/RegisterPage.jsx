@@ -73,8 +73,6 @@ export default function RegisterPage() {
                 };
             });
 
-            console.log("playersWithCharacterImages:", playersWithCharacterImages);
-
             sessionStorage.setItem("playersData", JSON.stringify(playersWithCharacterImages));
             navigate("/game", { state: { playersData: playersWithCharacterImages } });
         } catch (err) {
