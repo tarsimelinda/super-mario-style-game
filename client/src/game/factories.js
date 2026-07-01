@@ -28,14 +28,11 @@ function getPlayerImageUrl(playerData) {
 }
 
 export function createPlayers(level, playerCount, players = []) {
-    console.log("players passed to createPlayers:", players);
 
     const playerStart = level?.playerStart || { x: 50, y: 200 };
 
     const player1Data = players[0];
     const player2Data = players[1];
-
-    console.log("player1 imageUrl:", getPlayerImageUrl(player1Data));
 
     const player1 = new Player(
     playerStart.x,

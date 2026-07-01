@@ -1,11 +1,11 @@
-const API_BASE = "/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export async function apiFetch(path, options = {}) {
-    const token = import.meta.env.VITE_API_KEY;
+    const apiKey = import.meta.env.VITE_API_KEY;
 
     const headers = {
         "Content-Type": "application/json",
-        "X-API-KEY": token,
+        "X-API-KEY": apiKey,
         ...(options.headers || {}),
     };
 
@@ -22,4 +22,3 @@ export async function apiFetch(path, options = {}) {
         data,
     };
 }
-
